@@ -1,4 +1,4 @@
-import { ArbitraryEntity } from "../../apis/arbitrary.ts";
+import { ArbitraryEntity } from "../../apis/meta.ts";
 import { EntityStorage } from "../storage.ts";
 
 export class StaticEntityStorage<T extends ArbitraryEntity> implements EntityStorage {

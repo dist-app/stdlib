@@ -1,4 +1,4 @@
-import { ArbitraryEntity } from "../../apis/arbitrary.ts";
+import { ArbitraryEntity } from "../../apis/meta.ts";
 
 export interface ProfileDoc {
   _id: string;

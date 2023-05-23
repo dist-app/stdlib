@@ -1,4 +1,4 @@
-import { ArbitraryEntity } from "../../apis/arbitrary.ts";
+import { ArbitraryEntity } from "../../apis/meta.ts";
 import { DDPClient, MongoCollection } from "../ddp/client/ddp-client.ts";
 import { CatalogDoc, EntityDoc, ProfileDoc } from "../ddp/db.ts";
 import { EntityStorage } from "../storage.ts";

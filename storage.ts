@@ -1,4 +1,4 @@
-import { ArbitraryEntity } from "../apis/arbitrary.ts";
+import { ArbitraryEntity } from "../apis/meta.ts";
 
 export type NamespaceSpecWithImpl = {
   // layers: Array<Omit<NamespaceEntity['spec']['layers'][number], 'storage'> & {

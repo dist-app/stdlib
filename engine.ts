@@ -8,7 +8,7 @@
 // import { MongoEntityStorage, MongoProfileStorage, StaticEntityStorage } from "./EntityStorage";
 // import { LayeredNamespace } from "./next-gen";
 
-import { ArbitraryEntity } from "../apis/arbitrary.ts";
+import { ArbitraryEntity } from "../apis/meta.ts";
 import { EntityStorage, LayeredNamespace, NamespaceSpecWithImpl } from "./storage.ts";
 
 
