@@ -2,7 +2,7 @@ import * as ows from "https://deno.land/x/stream_observables@v1.3/mod.ts";
 
 import { ArbitraryEntity } from "../../apis/meta.ts";
 import { EntityStorage } from "../storage.ts";
-import { trace, SpanKind, propagation, context, TextMapGetter, ROOT_CONTEXT, SpanContext } from "https://deno.land/x/observability@v0.3.4/api.ts";
+import { trace, SpanKind, propagation, context, TextMapGetter, ROOT_CONTEXT, SpanContext } from "https://deno.land/x/observability@v0.4.0/opentelemetry/api.js";
 
 type KvRealtimeEvent =
 | {
