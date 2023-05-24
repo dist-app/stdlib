@@ -268,6 +268,7 @@ export class DDPClient {
       case 'changed':
       case 'removed':
       case 'movedBefore':
+        console.debug('docevent:', packet.msg, packet.id);
         const coll = this.grabCollection(packet.collection);
         coll.handlePacket(packet);
         break;

@@ -4,7 +4,7 @@ import { ROOT_CONTEXT, SpanKind, TextMapGetter, propagation, trace } from "https
 import { ClientSentPacket, ServerSentPacket } from "../types.ts";
 
 export type MethodHandler = (socket: InboundDdpSocket, params: unknown[]) => unknown;
-export type PublicationHandler = (socket: InboundDdpSocket, params: unknown[]) => unknown;
+export type PublicationHandler = (socket: InboundDdpSocket, params: unknown[], stopSignal: AbortSignal) => unknown;
 
 // We add an extra field on DDP requests for distributed tracing.
 // This is compatible with the meteor package "danopia:opentelemetry".
@@ -46,12 +46,12 @@ export class DdpInterface {
     return await handler(socket, params);
   }
 
-  async callSubscribe(socket: InboundDdpSocket, name: string, params: unknown[]) {
+  async callSubscribe(socket: InboundDdpSocket, name: string, params: unknown[], stopSignal: AbortSignal) {
     const handler = this.publications.get(name);
     if (!handler) {
       throw new Error(`unimplemented sub: "${name}"`);
     }
-    return await handler(socket, params);
+    return await handler(socket, params, stopSignal);
   }
 }
 
@@ -80,12 +80,21 @@ export class InboundDdpSocket {
     this.closePromise = new Promise<void>((ok, fail) => {
       socket.onerror = (evt: ErrorEventInit) => {
         fail(new Error(`WebSocket errored: ${evt.message}`));
+        this.closeCtlr.abort(evt);
         console.log("WebSocket errored:", evt.message);
-      }
+      };
       socket.onclose = () => {
         ok();
+        this.closeCtlr.abort();
         console.log("WebSocket closed");
+      };
+    });
+
+    this.closeCtlr.signal.addEventListener('abort', () => {
+      for (const ctlr of this.subStopCtlrs.values()) {
+        ctlr.abort(`Client disconnected`);
       }
+      this.subStopCtlrs.clear();
     });
 
     // this.telemetryAttrs = {
@@ -101,6 +110,11 @@ export class InboundDdpSocket {
   }
   // telemetryAttrs: Attributes;
   public readonly closePromise: Promise<void>;
+
+  private readonly closeCtlr = new AbortController();
+  public readonly closeSignal = this.closeCtlr.signal;
+
+  private readonly subStopCtlrs = new Map<string, AbortController>();
 
   async handleClientPacket(pkt: TracedClientSentPacket) {
     const ctx = propagation.extract(ROOT_CONTEXT, pkt.baggage ?? {}, BaggageGetter);
@@ -119,7 +133,9 @@ export class InboundDdpSocket {
           msg: "pong",
         }]);
         break;
-      case 'sub':
+      case 'sub': {
+        const stopCtlr = new AbortController();
+        this.subStopCtlrs.set(pkt.id, stopCtlr);
         await subtracer.startActiveSpan(pkt.name, {
           kind: SpanKind.SERVER,
           attributes: {
@@ -128,7 +144,7 @@ export class InboundDdpSocket {
             'rpc.ddp.sub_id': pkt.id,
           },
         }, ctx, (span) => this.ddpInterface
-          .callSubscribe(this, pkt.name, pkt.params)
+          .callSubscribe(this, pkt.name, pkt.params, stopCtlr.signal)
           .then<ServerSentPacket,ServerSentPacket>(x => ({
             msg: "ready",
             subs: [pkt.id],
@@ -142,7 +158,14 @@ export class InboundDdpSocket {
           }))
           .then(pkt => this.send([pkt]))
           .finally(() => span.end()));
-        break;
+      } break;
+      case 'unsub': {
+        const ctlr = this.subStopCtlrs.get(pkt.id);
+        if (ctlr) {
+          ctlr.abort(`Client requested unsub`);
+          this.subStopCtlrs.delete(pkt.id);
+        }
+      } break;
       case 'method':
         await methodtracer.startActiveSpan(pkt.method, {
           kind: SpanKind.SERVER,
@@ -174,6 +197,7 @@ export class InboundDdpSocket {
   }
 
   send(pkts: ServerSentPacket[]) {
+    this.closeSignal.throwIfAborted();
     for (const pkt of pkts) {
       console.log('-->', Deno.inspect(pkt, { depth: 0 }));
     }
