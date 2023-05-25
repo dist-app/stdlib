@@ -169,6 +169,7 @@ export class DDPClient {
       },
     });
 
+    console.log('--> sub', name, params);
     return await new Promise<void>((ok, fail) => {
       this.pendingSubs.set(subId, {ok, fail, span});
       this.sendMessage({
