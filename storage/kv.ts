@@ -7,7 +7,7 @@ export class KvEntityStorage implements EntityStorage {
     private readonly prefix: Deno.KvKey,
   ) {}
   async insertEntity<T extends ArbitraryEntity>(entity: T): Promise<void> {
-    const coords = [...this.prefix, 'entities', entity.apiVersion, entity.kind, entity.metadata.name];
+    const coords = [...this.prefix, entity.apiVersion, entity.kind, entity.metadata.name];
     const result = await this.kv.atomic()
       .check({ key: coords, versionstamp: null })
       .set(coords, {
@@ -25,7 +25,7 @@ export class KvEntityStorage implements EntityStorage {
   }
   async listAllEntities(): Promise<ArbitraryEntity[]> {
     const entities = new Array<ArbitraryEntity>;
-    for await (const entry of this.kv.list({ prefix: [...this.prefix, 'entities'] })) {
+    for await (const entry of this.kv.list({ prefix: [...this.prefix] })) {
       entities.push(entry.value as ArbitraryEntity);
     }
     return entities;
@@ -33,21 +33,21 @@ export class KvEntityStorage implements EntityStorage {
   async listEntities<T extends ArbitraryEntity>(apiVersion: T["apiVersion"],kind: T["kind"]): Promise<T[]> {
     const entities = new Array<T>;
     const coords: string[] = [apiVersion, kind];
-    for await (const entry of this.kv.list({ prefix: [...this.prefix, 'entities', ...coords] })) {
+    for await (const entry of this.kv.list({ prefix: [...this.prefix, ...coords] })) {
       entities.push(entry.value as T);
     }
     return entities;
   }
   async getEntity<T extends ArbitraryEntity>(apiVersion: T["apiVersion"],kind: T["kind"],name: string): Promise<T|null> {
     const coords: string[] = [apiVersion, kind, name];
-    const entry = await this.kv.get([...this.prefix, 'entities', ...coords]);
+    const entry = await this.kv.get([...this.prefix, ...coords]);
     if (entry.versionstamp) {
       return entry.value as T;
     }
     return null;
   }
   async updateEntity<T extends ArbitraryEntity>(newEntity: T): Promise<void> {
-    const coords = [...this.prefix, 'entities', newEntity.apiVersion, newEntity.kind, newEntity.metadata.name];
+    const coords = [...this.prefix, newEntity.apiVersion, newEntity.kind, newEntity.metadata.name];
     const prev = await this.kv.get(coords);
     const prevEntity = prev.value as ArbitraryEntity | null;
     if (!prevEntity) throw new Error(`doc didn't exist`);
@@ -70,7 +70,7 @@ export class KvEntityStorage implements EntityStorage {
     if (!result.ok) throw new Error('sorry, you lost the update race');
   }
   async deleteEntity<T extends ArbitraryEntity>(apiVersion: T["apiVersion"],kind: T["kind"],name: string): Promise<boolean> {
-    const coords = [...this.prefix, 'entities', apiVersion, kind, name];
+    const coords = [...this.prefix, apiVersion, kind, name];
     const prev = await this.kv.get(coords);
     if (!prev) throw new Error(`doc didn't exist`);
     // if (prev.value?.metadata.generation !== entity.metadata.generation) {
