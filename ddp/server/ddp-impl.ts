@@ -67,10 +67,15 @@ export class InboundDdpSocket {
   constructor (
     private readonly socket: WebSocket,
     private readonly ddpInterface: DdpInterface,
+    public readonly encapsulation: 'sockjs' | 'raw',
   ) {
-    socket.onopen = () => socket.send('o');
+    socket.onopen = () => {
+      if (this.encapsulation == 'sockjs') socket.send('o');
+    };
     socket.onmessage = (e) => {
-      const msgs = JSON.parse(e.data) as string[];
+      const msgs = this.encapsulation == 'sockjs'
+        ? JSON.parse(e.data) as string[]
+        : [e.data as string];
       for (const msgText of msgs) {
         const msg = EJSON.parse(msgText) as TracedClientSentPacket;
         this.handleClientPacket(msg);
@@ -199,8 +204,13 @@ export class InboundDdpSocket {
   send(pkts: ServerSentPacket[]) {
     this.closeSignal.throwIfAborted();
     for (const pkt of pkts) {
-      console.log('-->', Deno.inspect(pkt, { depth: 0 }));
+      console.log('-->', pkt.msg);
+      if (this.encapsulation == 'raw') {
+        this.socket.send(EJSON.stringify(pkt));
+      }
     }
-    this.socket.send('a'+JSON.stringify(pkts.map(x => EJSON.stringify(x))));
+    if (this.encapsulation == 'sockjs') {
+      this.socket.send('a'+JSON.stringify(pkts.map(x => EJSON.stringify(x))));
+    }
   }
 }
