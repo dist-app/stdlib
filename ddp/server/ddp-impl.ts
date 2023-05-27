@@ -157,8 +157,12 @@ export class InboundDdpSocket {
             msg: "nosub",
             id: pkt.id,
             error: {
-              error: err.message,
-              message: err.message,
+              isClientSafe: true,
+              error: 'server-error',
+              reason: err.message,
+              message: err.message+' [server-error]',
+              details: 'TODO: more metadata for DDP errors',
+              errorType: "Meteor.Error",
             },
           }))
           .then(pkt => this.send([pkt]))

@@ -23,11 +23,11 @@ export type ClientSentPacket = {
 
 export interface MeteorError {
   isClientSafe?: boolean;
-  error?: number;
+  error?: number | string;
   reason?: string;
   message?: string;
-  // isn't there also a detail?
-  errorType?: string;
+  details?: string;
+  errorType?: string; // e.g. "Meteor.Error"
 };
 
 export type ServerSentPacket = {
