@@ -9,6 +9,7 @@
 // import { LayeredNamespace } from "./next-gen";
 
 import { ArbitraryEntity } from "../apis/meta.ts";
+import { EntityHandle } from "./handle.ts";
 import { EntityStorage, LayeredNamespace, NamespaceSpecWithImpl } from "./storage.ts";
 
 
@@ -70,9 +71,9 @@ export class EntityEngine {
     if (this.namespaces.has(opts.name)) {
       throw new Error(`namespace already exists`);
     }
-    switch (opts.spec.layers) {
+    // switch (opts.spec.layers) {
 
-    }
+    // }
     this.namespaces.set(opts.name, new LayeredNamespace(opts.name, opts.spec));
   }
 
@@ -163,7 +164,10 @@ export class EntityEngine {
     //     'distapp.entity.name': entity.metadata.name,
     //   },
     // }, async () =>
-    return await layer?.insertEntity<T>(entity);
+    await layer?.insertEntity<T>(entity);
+    return this.getEntityHandle<T>(
+      entity.apiVersion, entity.kind,
+      entity.metadata.namespace ?? 'default', entity.metadata.name);
   }
 
   async listEntities<T extends ArbitraryEntity>(
@@ -218,23 +222,17 @@ export class EntityEngine {
     // });
   }
 
-  // loadEntity<T extends ArbitraryEntity>(
-  //   apiVersion: T["apiVersion"],
-  //   kind: T["kind"],
-  //   namespace: string | undefined,
-  //   name: string
-  // ) {
-  //   const key = [namespace, apiVersion, kind, name].join('_');
-  //   let exists = this.loadedMap.get(key);
-  //   if (!exists) {
-  //     const entity = this.getEntity(apiVersion, kind, namespace, name);
-  //     if (!entity) return null;
-  //     exists = loadFunc.call(this, entity, key);
-  //     this.loadedMap.set(key, exists);
-  //   }
-  //   return exists;
-  //   // return await this.loader.get(entity);
-  // }
+  getEntityHandle<T extends ArbitraryEntity>(
+    apiVersion: T["apiVersion"],
+    apiKind: T["kind"],
+    namespace: string,
+    name: string
+  ) {
+    return new EntityHandle<T>(this, {
+      apiVersion, apiKind,
+      namespace, name,
+    });
+  }
 
   async updateEntity<T extends ArbitraryEntity>(newEntity: T) {
     // return tracer.asyncSpan('engine updateEntity', {
