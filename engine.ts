@@ -297,6 +297,7 @@ export class EntityEngine {
           return;
         } catch (err) {
           // TODO: hook back up when ddp client has proper errors
+          console.log('catching mutate err', JSON.stringify(err), err);
           // if (err instanceof Meteor.Error && err.error == 'no-update') {
           //   const richDetailsTODO = err.details as undefined | string | {latestVersion: T};
           //   if (richDetailsTODO && typeof richDetailsTODO !== 'string' && richDetailsTODO.latestVersion) {
@@ -304,7 +305,7 @@ export class EntityEngine {
           //     continue;
           //   }
           // } else {
-            throw err;
+            throw new Error(`Mutation failed: ${err.message}`);
           // }
         }
 
