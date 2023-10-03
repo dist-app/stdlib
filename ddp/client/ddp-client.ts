@@ -2,6 +2,7 @@ import {default as EJSON} from "https://cdn.skypack.dev/ejson@2.2.3";
 
 import { trace, SpanKind, SpanStatusCode, Span, context, propagation, Context } from "https://deno.land/x/observability@v0.4.3/opentelemetry/api.js";
 
+const clientTracer = trace.getTracer('ddp.client');
 const methodTracer = trace.getTracer('ddp.method');
 const subTracer = trace.getTracer('ddp.subscription');
 
@@ -300,32 +301,39 @@ export class DDPClient {
     sockUrl.protocol = sockUrl.protocol.replace(/^http/, 'ws');
     const wss = new WebSocketStream(sockUrl.toString());
 
-    const {readable, writable} = await wss.connection;
+    const connectSpan = clientTracer.startSpan('DDP connection');
+    const {readable, writable} = await wss.connection.finally(() => connectSpan.end());
 
     // TODO: typecheck
     const ddp = new this(wss, readable as ReadableStream<string>, writable);
-    await ddp.sendMessage({
-      msg: "connect",
-      version: "1",
-      support: ["1"],
-    });
 
-    const reader = readable.getReader() as ReadableStreamDefaultReader<string>;
+    const setupReader = readable.getReader() as ReadableStreamDefaultReader<string>;
 
-    {
-      const {value} = await reader.read();
-      if (value !== 'o') throw new Error(`Unexpected banner: ${JSON.stringify(value)}`)
+    const handshakeSpan = clientTracer.startSpan('DDP handshake');
+    try {
+      await ddp.sendMessage({
+        msg: "connect",
+        version: "1",
+        support: ["1"],
+      });
+
+      {
+        const {value} = await setupReader.read();
+        if (value !== 'o') throw new Error(`Unexpected banner: ${JSON.stringify(value)}`)
+      }
+
+      // TODO: the parsing should be handled by a transformstream, read from that instead
+      const {value} = await setupReader.read();
+      if (value?.[0] !== 'a') throw new Error(`Unexpected connect resp: ${JSON.stringify(value)}`)
+      const packet: ServerSentPacket = JSON.parse(JSON.parse(value.slice(1))[0]);
+      if (packet.msg !== 'connected') throw new Error(`Unexpected connect msg: ${JSON.stringify(packet)}`);
+      // const session = packet.session as string;
+    } finally {
+      handshakeSpan.end();
     }
 
-    // TODO: the parsing should be handled by a transformstream, read from that instead
-    const {value} = await reader.read();
-    if (value?.[0] !== 'a') throw new Error(`Unexpected connect resp: ${JSON.stringify(value)}`)
-    const packet: ServerSentPacket = JSON.parse(JSON.parse(value.slice(1))[0]);
-    if (packet.msg !== 'connected') throw new Error(`Unexpected connect msg: ${JSON.stringify(packet)}`);
-    // const session = packet.session as string;
-
-    reader.releaseLock();
-    ddp.runInboundLoop(); // throwaway promise
+    setupReader.releaseLock();
+    ddp.runInboundLoop(); // throw away the promise (it's fine)
     return ddp;
   }
 }
