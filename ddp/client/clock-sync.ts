@@ -8,11 +8,11 @@ export async function discoverClockOffset(client: DDPClient) {
 
   const rtt = dT - d0;
   const offset = dS - (d0 + rtt / 2);
-  console.log({ d0, dS, dT, rtt, offset });
+  // console.log({ d0, dS, dT, rtt, offset });
 
   // Let's not make a big mess if the offset is (falsely) large
   if (Math.abs(offset) > 5000) {
-    console.log('Clock offset unbelievable:', offset);
+    console.error('WARN: Clock offset unbelievable, ignoring:', offset);
     return 0;
   }
 
