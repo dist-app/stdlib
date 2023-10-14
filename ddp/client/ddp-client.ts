@@ -302,7 +302,7 @@ export class DDPClient {
     const wss = new WebSocketStream(sockUrl.toString());
 
     const connectSpan = clientTracer.startSpan('DDP connection');
-    const {readable, writable} = await wss.connection.finally(() => connectSpan.end());
+    const {readable, writable} = await wss.opened.finally(() => connectSpan.end());
 
     // TODO: typecheck
     const ddp = new this(wss, readable as ReadableStream<string>, writable);
