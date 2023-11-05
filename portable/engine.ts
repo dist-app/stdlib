@@ -18,7 +18,8 @@
 //   } & Record<string,unknown>;
 // }
 
-import { ApiKindEntity, EntityStorage } from "./types.d.ts";
+import type { StreamEvent } from "https://raw.githubusercontent.com/danopia/dist-app-meteor/d755b39892f216f6db4ccbfb85cc19d100e8aed8/imports/entities/core.ts";
+import type { ApiKindEntity, EntityStorage } from "./types.d.ts";
 // import { EntityStorage, LayeredNamespace, NamespaceSpecWithImpl } from "../storage.ts";
 
 export type MutationOptions<T extends ApiKindEntity> =
@@ -131,6 +132,31 @@ export class EntityEngine {
     });
     const list = await layer.listEntities<T>(apiVersion, kind);
     return list;
+  }
+
+  observeEntities<T extends ApiKindEntity>(
+    apiVersion: T["apiVersion"],
+    kind: T["kind"],
+    filterCb?: (entity: T) => boolean,
+  ): ReadableStream<StreamEvent<T>> {
+    const layer = this.selectNamespaceLayer({
+      apiVersion: apiVersion,
+    });
+    return new ReadableStream({
+      async start(ctlr) {
+        const list = await layer.listEntities<T>(apiVersion, kind);
+        for (const entity of list) {
+          ctlr.enqueue({
+            kind: 'Creation',
+            snapshot: entity,
+          });
+        }
+        ctlr.enqueue({
+          kind: 'InSync',
+        });
+        console.warn(`TODO: EntityEntity must plumb observeEntity`);
+      },
+    });
   }
 
   async getEntity<T extends ApiKindEntity>(
