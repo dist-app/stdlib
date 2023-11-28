@@ -36,16 +36,21 @@ class DDPCollection {
   }
 }
 
+interface FindOpts {
+  fields?: Record<string, boolean>;
+}
+
 export class MongoCollection<T extends {_id: string}> {
   constructor(
     private readonly ddpColl: DDPCollection,
   ) {}
 
-  *_findGenerator(selector: Record<string,unknown>) {
+  *_findGenerator(selector: Record<string,unknown>, opts?: FindOpts) {
     for (const [_id, fields] of this.ddpColl.fields) {
       let matches = true;
       for (const [field, spec] of Object.entries(selector)) {
         if (field.startsWith('$')) throw new Error(`TODO: selectors 1`);
+        // console.log({spec, selector})
         if (Object.keys(spec as {}).some(x => x.startsWith('$'))) throw new Error(`TODO: selectors 2`);
         if (field == '_id') {
           if (spec !== _id) matches = false;
@@ -68,25 +73,54 @@ export class MongoCollection<T extends {_id: string}> {
         throw new Error(`TODO: selectors!`);
       }
       if (matches) {
-        yield { _id, ...EJSON.clone(fields) } as T;
+        yield makeReturnDoc(_id, fields as T, opts);
       }
     }
   }
 
-  findOne(selector: Record<string,unknown>) {
-    for (const doc of this._findGenerator(selector)) {
+  findOne(selector: Record<string,unknown>, opts?: FindOpts) {
+    for (const doc of this._findGenerator(selector, opts)) {
       return doc;
     }
     return null;
   }
 
-  find(selector: Record<string,unknown>) {
-    const iterable = this._findGenerator(selector);
+  find(selector: Record<string,unknown>, opts?: FindOpts) {
+    const iterable = this._findGenerator(selector, opts);
     return {
       [Symbol.iterator]: iterable[Symbol.iterator],
       fetch: () => [...iterable],
     };
   }
+}
+
+/** Clones a document using the 'fields' subset. */
+function makeReturnDoc<T extends {_id: string}>(_id: string, original: T, opts?: FindOpts) {
+  // const cloned = EJSON.clone(original);
+
+  const fieldsSpec = (opts?.fields ?? {}) as Record<keyof T, boolean|undefined>;
+  const subset: Partial<T> = {};
+  let includeOthers = true;
+  for (const pair of Object.entries(fieldsSpec)) {
+    if (pair[1] === true) {
+      includeOthers = false;
+      if (pair[0] == '_id') {
+        subset['_id'] = _id;
+      } else if (pair[0] in original) {
+        subset[pair[0] as keyof T] = EJSON.clone(original[pair[0] as keyof T]);
+      }
+    }
+  }
+  if (includeOthers) {
+    for (const pair of Object.entries(original)) {
+      if (pair[0] in fieldsSpec) continue;
+      subset[pair[0] as keyof T] = EJSON.clone(pair[1]);
+    }
+    if (!('_id' in fieldsSpec)) {
+      subset['_id'] = _id;
+    }
+  }
+  return subset as T; // TODO: this is a lie once fields is supplied
 }
 
 export class DDPClient {

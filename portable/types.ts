@@ -1,17 +1,36 @@
-
-
-// not sure if this is enough
 export interface ApiKindEntity extends Record<string,unknown> {
   apiVersion: string;
   kind: string;
-  metadata: {
-    name: string;
-    creationTimestamp?: Date;
-    generation?: number;
-    uuid?: string,
-  } & Record<string,unknown>;
+  metadata: EntityMetadata & Record<string,unknown>;
 }
 
+export interface EntityMetadata {
+  name: string;
+  creationTimestamp?: Date;
+  generation?: number;
+  uid?: string, // TODO: rename to uuid?
+
+  updateTimestamp?: Date;
+  title?: string;
+  description?: string;
+  labels?: Record<string,string|undefined>;
+  annotations?: Record<string,string|undefined>;
+  tags?: Array<string>;
+  links?: Array<{
+    url: string;
+    title?: string;
+    icon?: string;
+    type?: string;
+  }>;
+  ownerReferences?: Array<{
+    apiVersion: string;
+    kind: string;
+    name: string;
+    uid?: string; // this is required in kubernetes
+    blockOwnerDeletion?: boolean;
+    controller?: boolean;
+  }>;
+}
 
 export interface EntityStorage {
   insertEntity<T extends ApiKindEntity>(entity: T): Promise<void>;

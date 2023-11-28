@@ -1,7 +1,6 @@
 import * as ows from "https://deno.land/x/stream_observables@v1.3/mod.ts";
 
-import { ArbitraryEntity } from "../../apis/meta.ts";
-import { EntityStorage } from "../storage.ts";
+import { EntityStorage, ApiKindEntity, StreamEvent } from "../portable/types.ts";
 import { trace, SpanKind, propagation, context, TextMapGetter, ROOT_CONTEXT, SpanContext } from "https://deno.land/x/observability@v0.4.3/opentelemetry/api.js";
 
 type KvRealtimeEvent =
@@ -195,7 +194,12 @@ export class KvRealtimeEntityStorage implements EntityStorage {
     private readonly context: KvRealtimeContext,
     private readonly prefix: Deno.KvKey,
   ) {}
-  async insertEntity<T extends ArbitraryEntity>(entity: T): Promise<void> {
+
+  observeEntities<T extends ApiKindEntity>(apiVersion: T["apiVersion"], kind: T["kind"], signal?: AbortSignal | undefined): ReadableStream<StreamEvent<T>> {
+    throw new Error("TODO: Method not implemented.");
+  }
+
+  async insertEntity<T extends ApiKindEntity>(entity: T): Promise<void> {
     const coords = [...this.prefix, entity.apiVersion, entity.kind, entity.metadata.name];
     const result = await this.context.createKey(coords, {
       ...entity,
@@ -210,12 +214,12 @@ export class KvRealtimeEntityStorage implements EntityStorage {
     if (!result.ok) throw new Error('entity already exists');
     // TODO: probably return the new entity? (incl. uid, resourceVersion, creationTimestamp)
   }
-  async listAllEntities(): Promise<ArbitraryEntity[]> {
+  async listAllEntities(): Promise<ApiKindEntity[]> {
     const entries = await this.context.collectList({
       prefix: [...this.prefix],
     });
-    return entries.map<ArbitraryEntity>(entry => {
-      const entity = entry.value as ArbitraryEntity;
+    return entries.map<ApiKindEntity>(entry => {
+      const entity = entry.value as ApiKindEntity;
       return {
         ...entity,
         metadata: {
@@ -225,7 +229,7 @@ export class KvRealtimeEntityStorage implements EntityStorage {
       };
     });
   }
-  async listEntities<T extends ArbitraryEntity>(apiVersion: T["apiVersion"], kind: T["kind"]): Promise<T[]> {
+  async listEntities<T extends ApiKindEntity>(apiVersion: T["apiVersion"], kind: T["kind"]): Promise<T[]> {
     const coords: string[] = [apiVersion, kind];
     const entries = await this.context.collectList({
       prefix: [...this.prefix, ...coords],
@@ -241,7 +245,7 @@ export class KvRealtimeEntityStorage implements EntityStorage {
       };
     });
   }
-  async getEntity<T extends ArbitraryEntity>(apiVersion: T["apiVersion"],kind: T["kind"],name: string): Promise<T|null> {
+  async getEntity<T extends ApiKindEntity>(apiVersion: T["apiVersion"],kind: T["kind"],name: string): Promise<T|null> {
     const coords: string[] = [apiVersion, kind, name];
     const entry = await this.context.getKey([...this.prefix, ...coords]);
     if (!entry.versionstamp) return null;
@@ -254,10 +258,10 @@ export class KvRealtimeEntityStorage implements EntityStorage {
       },
     };
   }
-  async updateEntity<T extends ArbitraryEntity>(newEntity: T): Promise<void> {
+  async updateEntity<T extends ApiKindEntity>(newEntity: T): Promise<void> {
     const coords = [...this.prefix, newEntity.apiVersion, newEntity.kind, newEntity.metadata.name];
     const prev = await this.context.getKey(coords);
-    const prevEntity = prev.value as ArbitraryEntity | null;
+    const prevEntity = prev.value as ApiKindEntity | null;
     if (!prevEntity || !prev.versionstamp) throw new Error(`doc didn't exist`);
     if (prevEntity.metadata.generation !== newEntity.metadata.generation) {
       throw new Error(`doc is out of date`);
@@ -274,7 +278,7 @@ export class KvRealtimeEntityStorage implements EntityStorage {
     });
     if (!result.ok) throw new Error('sorry, you lost the update race');
   }
-  async deleteEntity<T extends ArbitraryEntity>(apiVersion: T["apiVersion"],kind: T["kind"],name: string): Promise<boolean> {
+  async deleteEntity<T extends ApiKindEntity>(apiVersion: T["apiVersion"],kind: T["kind"],name: string): Promise<boolean> {
     const coords = [...this.prefix, apiVersion, kind, name];
     const prev = await this.context.getKey(coords);
     if (!prev.versionstamp) throw new Error(`doc didn't exist`);

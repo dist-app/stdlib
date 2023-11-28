@@ -1,68 +1,56 @@
-import { ArbitraryEntity } from "../../apis/meta.ts";
 import { DDPClient, MongoCollection } from "../ddp/client/ddp-client.ts";
 import { CatalogDoc, EntityDoc, ProfileDoc } from "../ddp/db.ts";
-import { EntityStorage } from "../storage.ts";
+import { EntityStorage, ApiKindEntity, StreamEvent } from "../portable/types.ts";
 
 // const remoteConns = new Map<string, DDP.DDPStatic>();
 // const entitiesColls = new Map<DDP.DDPStatic, Mongo.Collection<EntityDoc>>();
 
+// TODO: rename to DdpCatalogStorage
 export class DdpEntityStorage implements EntityStorage {
   constructor(private readonly props: {
     ddp: DDPClient,
     EntitiesCollection: MongoCollection<EntityDoc>;
     catalogId: string;
-    namespace: string;
+    // namespace: string;
   }) {
+  }
+
+  observeEntities<T extends ApiKindEntity>(apiVersion: T["apiVersion"], kind: T["kind"], signal?: AbortSignal | undefined): ReadableStream<StreamEvent<T>> {
+    throw new Error("TODO: Method not implemented.");
   }
 
   async listAllEntities() {
     return this.props.EntitiesCollection.find({
       catalogId: this.props.catalogId,
-    }).fetch().map(x => ({ ...x, metadata: { ...x.metadata, namespace: this.props.namespace } }));
+    }).fetch();
   }
 
-  async listEntities<T extends ArbitraryEntity>(apiVersion: T["apiVersion"], kind: T["kind"]) {
-    // console.log({
-    //   filter: {
-    //     apiVersion: apiVersion,
-    //     kind: kind,
-    //     catalogId: this.props.catalogId,
-    //     'metadata.namespace': this.props.namespace,
-    //   },
-    //   all: this.props.collection.find().fetch(),
-    // })
+  async listEntities<T extends ApiKindEntity>(apiVersion: T["apiVersion"], kind: T["kind"]) {
     return this.props.EntitiesCollection.find({
       catalogId: this.props.catalogId,
       apiVersion: apiVersion,
       kind: kind,
-      // 'metadata.namespace': this.props.namespace,
-    }).fetch()
-      .map(x => ({ ...x, metadata: { ...x.metadata, namespace: this.props.namespace } }) as {} as T);
+    }).fetch() as ApiKindEntity[] as T[];
   }
 
-  async getEntity<T extends ArbitraryEntity>(apiVersion: T["apiVersion"], kind: T["kind"], name: string) {
-    const entity = this.props.EntitiesCollection.findOne({
+  async getEntity<T extends ApiKindEntity>(apiVersion: T["apiVersion"], kind: T["kind"], name: string) {
+    return this.props.EntitiesCollection.findOne({
       catalogId: this.props.catalogId,
       apiVersion: apiVersion,
       kind: kind,
-      // 'metadata.namespace': this.props.namespace,
       'metadata.name': name,
     }) as T & { catalogId: string; _id: string };
-
-    return entity ? { ...entity,
-      metadata: { ...entity.metadata, namespace: this.props.namespace },
-    } : entity;
   }
 
 
   // TODO: the span should probably be set before calling into these
-  async insertEntity<T extends ArbitraryEntity>(entity: T) {
+  async insertEntity<T extends ApiKindEntity>(entity: T) {
     await this.props.ddp.callMethod('/v1alpha1/Entity/insert', [this.props.catalogId, entity]);
   }
-  async updateEntity<T extends ArbitraryEntity>(newEntity: T) {
+  async updateEntity<T extends ApiKindEntity>(newEntity: T) {
     await this.props.ddp.callMethod<void>('/v1alpha1/Entity/update', [this.props.catalogId, newEntity]);
   }
-  async deleteEntity<T extends ArbitraryEntity>(apiVersion: T["apiVersion"], kind: T["kind"], name: string) {
+  async deleteEntity<T extends ApiKindEntity>(apiVersion: T["apiVersion"], kind: T["kind"], name: string) {
     return await this.props.ddp.callMethod<boolean>('/v1alpha1/Entity/delete', [this.props.catalogId, apiVersion, kind, name]);
   }
 }

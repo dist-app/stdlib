@@ -18,7 +18,8 @@
 //   } & Record<string,unknown>;
 // }
 
-import type { ApiKindEntity, EntityStorage, StreamEvent } from "./types.d.ts";
+import type { ApiKindEntity, EntityStorage, StreamEvent } from "./types.ts";
+
 // import { EntityStorage, LayeredNamespace, NamespaceSpecWithImpl } from "../storage.ts";
 
 export type MutationOptions<T extends ApiKindEntity> =
@@ -131,6 +132,21 @@ export class EntityEngine {
     });
     const list = await layer.listEntities<T>(apiVersion, kind);
     return list;
+  }
+
+  async listEntityHandles<T extends ApiKindEntity>(
+    apiVersion: T["apiVersion"],
+    kind: T["kind"],
+  ): Promise<EntityHandle<T>[]> {
+    const layer = this.selectNamespaceLayer({
+      apiVersion: apiVersion,
+    });
+    const list = await layer.listEntities<T>(apiVersion, kind);
+    return list.map(snapshot => {
+      const handle = this.getEntityHandle<T>(apiVersion, kind, snapshot.metadata.name);
+      handle.snapshot = snapshot;
+      return handle;
+    });
   }
 
   observeEntities<T extends ApiKindEntity>(
@@ -421,7 +437,7 @@ export class EntityHandle<Tself extends ApiKindEntity> {
   ) {
     // this.snapshot = engine.getEntity<Tself>(coords.apiVersion, coords.apiKind, coords.namespace, coords.name);
   }
-  // snapshot: Tself | null;
+  snapshot: Tself | null = null;
 
   getNeighborHandle<Tother extends ApiKindEntity>(
     apiVersion: Tother["apiVersion"],
@@ -478,16 +494,16 @@ export class EntityHandle<Tself extends ApiKindEntity> {
       this.coords.name);
   }
 
-  // async followOwnerReference<Towner extends ApiKindEntity>(
-  //   apiVersion: Towner["apiVersion"],
-  //   apiKind: Towner["kind"],
-  // ) {
-  //   const snapshot = await this.get();
+  async followOwnerReference<Towner extends ApiKindEntity>(
+    apiVersion: Towner["apiVersion"],
+    apiKind: Towner["kind"],
+  ) {
+    const snapshot = await this.get();
 
-  //   const ownerName = snapshot?.metadata.ownerReferences
-  //     ?.find(x => x.apiVersion == apiVersion && x.kind == apiKind)?.name;
-  //   if (!ownerName) return null;
+    const ownerName = snapshot?.metadata.ownerReferences
+      ?.find(x => x.apiVersion == apiVersion && x.kind == apiKind)?.name;
+    if (!ownerName) return null;
 
-  //   return this.engine.getEntityHandle<Towner>(apiVersion, apiKind, ownerName);
-  // }
+    return this.engine.getEntityHandle<Towner>(apiVersion, apiKind, ownerName);
+  }
 }

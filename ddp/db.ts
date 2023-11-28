@@ -1,4 +1,4 @@
-import { ArbitraryEntity } from "../../apis/meta.ts";
+import { ApiKindEntity } from "../portable/types.ts";
 
 export interface ProfileDoc {
   _id: string;
@@ -40,7 +40,7 @@ export interface CatalogDoc {
 }
 
 
-export type EntityDoc = ArbitraryEntity & {
+export type EntityDoc = ApiKindEntity & {
   _id: string;
   catalogId: string;
   // layerId: string;

@@ -1,15 +1,15 @@
-import { ArbitraryEntity } from "../../apis/meta.ts";
 import { DDPClient, MongoCollection } from "../ddp/client/ddp-client.ts";
 import { CatalogDoc, EntityDoc, ProfileDoc } from "../ddp/db.ts";
-import { EntityStorage } from "../storage.ts";
+import { EntityStorage, ApiKindEntity, StreamEvent } from "../portable/types.ts";
 import { DdpEntityStorage } from "./ddp-entities.ts";
 
 export class DdpProfileStorage implements EntityStorage {
   constructor(
     private readonly ddp: DDPClient,
     public readonly profileId: string,
-    public readonly namespaceName: string,
+    // public readonly namespaceName: string,
   ) {
+    if (typeof this.profileId !== 'string') throw new Error(`DdpProfileStorage needs profileId`);
     this.ProfilesCollection = ddp.getCollection<ProfileDoc>('Profiles');
     this.CatalogsCollection = ddp.getCollection<CatalogDoc>('Catalogs');
     this.EntitiesCollection = ddp.getCollection<EntityDoc>('Entities');
@@ -18,19 +18,23 @@ export class DdpProfileStorage implements EntityStorage {
   CatalogsCollection: MongoCollection<CatalogDoc>;
   EntitiesCollection: MongoCollection<EntityDoc>;
 
-  async insertEntity<T extends ArbitraryEntity>(entity: T): Promise<void> {
+  observeEntities<T extends ApiKindEntity>(apiVersion: T["apiVersion"], kind: T["kind"], signal?: AbortSignal | undefined): ReadableStream<StreamEvent<T>> {
+    throw new Error("TODO: Method not implemented.");
+  }
+
+  async insertEntity<T extends ApiKindEntity>(entity: T): Promise<void> {
     return await this.getStorage(entity.apiVersion, true)!.insertEntity(entity);
   }
-  async listEntities<T extends ArbitraryEntity>(apiVersion: T["apiVersion"], kind: T["kind"]): Promise<T[]> {
+  async listEntities<T extends ApiKindEntity>(apiVersion: T["apiVersion"], kind: T["kind"]): Promise<T[]> {
     return await this.getStorage(apiVersion, false)?.listEntities(apiVersion, kind) ?? [];
   }
-  async getEntity<T extends ArbitraryEntity>(apiVersion: T["apiVersion"], kind: T["kind"], name: string): Promise<T | null> {
+  async getEntity<T extends ApiKindEntity>(apiVersion: T["apiVersion"], kind: T["kind"], name: string): Promise<T | null> {
     return await this.getStorage(apiVersion, false)?.getEntity(apiVersion, kind, name) ?? null;
   }
-  async updateEntity<T extends ArbitraryEntity>(newEntity: T): Promise<void> {
+  async updateEntity<T extends ApiKindEntity>(newEntity: T): Promise<void> {
     return await this.getStorage(newEntity.apiVersion, true)!.updateEntity(newEntity);
   }
-  async deleteEntity<T extends ArbitraryEntity>(apiVersion: T["apiVersion"], kind: T["kind"], name: string): Promise<boolean> {
+  async deleteEntity<T extends ApiKindEntity>(apiVersion: T["apiVersion"], kind: T["kind"], name: string): Promise<boolean> {
     return await this.getStorage(apiVersion, true)!.deleteEntity(apiVersion, kind, name);
   }
   getStorage(apiVersion: string, required: boolean): EntityStorage | null {
@@ -61,7 +65,7 @@ export class DdpProfileStorage implements EntityStorage {
         ddp: this.ddp,
         EntitiesCollection: this.EntitiesCollection,
         catalogId: catalogId,
-        namespace: this.namespaceName,
+        // namespace: this.namespaceName,
       });
     }
     throw new Error(`TODO: umimpl mongo type`);
@@ -79,7 +83,7 @@ export class DdpProfileStorage implements EntityStorage {
           ddp: this.ddp,
           EntitiesCollection: this.EntitiesCollection,
           catalogId: catalogId,
-          namespace: this.namespaceName,
+          // namespace: this.namespaceName,
         });
       }
       throw new Error(`TODO: umimpl mongo type`);

@@ -1,12 +1,14 @@
-import { ArbitraryEntity } from "../../apis/meta.ts";
-import { EntityStorage } from "../storage.ts";
+import { EntityStorage, ApiKindEntity, StreamEvent } from "../portable/types.ts";
 
 export class KvEntityStorage implements EntityStorage {
   constructor(
     private readonly kv: Deno.Kv,
     private readonly prefix: Deno.KvKey,
   ) {}
-  async insertEntity<T extends ArbitraryEntity>(entity: T): Promise<void> {
+  observeEntities<T extends ApiKindEntity>(apiVersion: T["apiVersion"], kind: T["kind"], signal?: AbortSignal | undefined): ReadableStream<StreamEvent<T>> {
+    throw new Error("TODO: Method not implemented.");
+  }
+  async insertEntity<T extends ApiKindEntity>(entity: T): Promise<void> {
     const coords = [...this.prefix, entity.apiVersion, entity.kind, entity.metadata.name];
     const result = await this.kv.atomic()
       .check({ key: coords, versionstamp: null })
@@ -23,14 +25,14 @@ export class KvEntityStorage implements EntityStorage {
       .commit();
     if (!result.ok) throw new Error('entity already exists');
   }
-  async listAllEntities(): Promise<ArbitraryEntity[]> {
-    const entities = new Array<ArbitraryEntity>;
+  async listAllEntities(): Promise<ApiKindEntity[]> {
+    const entities = new Array<ApiKindEntity>;
     for await (const entry of this.kv.list({ prefix: [...this.prefix] })) {
-      entities.push(entry.value as ArbitraryEntity);
+      entities.push(entry.value as ApiKindEntity);
     }
     return entities;
   }
-  async listEntities<T extends ArbitraryEntity>(apiVersion: T["apiVersion"],kind: T["kind"]): Promise<T[]> {
+  async listEntities<T extends ApiKindEntity>(apiVersion: T["apiVersion"],kind: T["kind"]): Promise<T[]> {
     const entities = new Array<T>;
     const coords: string[] = [apiVersion, kind];
     for await (const entry of this.kv.list({ prefix: [...this.prefix, ...coords] })) {
@@ -38,7 +40,7 @@ export class KvEntityStorage implements EntityStorage {
     }
     return entities;
   }
-  async getEntity<T extends ArbitraryEntity>(apiVersion: T["apiVersion"],kind: T["kind"],name: string): Promise<T|null> {
+  async getEntity<T extends ApiKindEntity>(apiVersion: T["apiVersion"],kind: T["kind"],name: string): Promise<T|null> {
     const coords: string[] = [apiVersion, kind, name];
     const entry = await this.kv.get([...this.prefix, ...coords]);
     if (entry.versionstamp) {
@@ -46,10 +48,10 @@ export class KvEntityStorage implements EntityStorage {
     }
     return null;
   }
-  async updateEntity<T extends ArbitraryEntity>(newEntity: T): Promise<void> {
+  async updateEntity<T extends ApiKindEntity>(newEntity: T): Promise<void> {
     const coords = [...this.prefix, newEntity.apiVersion, newEntity.kind, newEntity.metadata.name];
     const prev = await this.kv.get(coords);
-    const prevEntity = prev.value as ArbitraryEntity | null;
+    const prevEntity = prev.value as ApiKindEntity | null;
     if (!prevEntity) throw new Error(`doc didn't exist`);
     if (prevEntity.metadata.generation !== newEntity.metadata.generation) {
       throw new Error(`doc is out of date`);
@@ -69,7 +71,7 @@ export class KvEntityStorage implements EntityStorage {
       .commit();
     if (!result.ok) throw new Error('sorry, you lost the update race');
   }
-  async deleteEntity<T extends ArbitraryEntity>(apiVersion: T["apiVersion"],kind: T["kind"],name: string): Promise<boolean> {
+  async deleteEntity<T extends ApiKindEntity>(apiVersion: T["apiVersion"],kind: T["kind"],name: string): Promise<boolean> {
     const coords = [...this.prefix, apiVersion, kind, name];
     const prev = await this.kv.get(coords);
     if (!prev) throw new Error(`doc didn't exist`);
