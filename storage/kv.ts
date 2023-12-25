@@ -35,14 +35,14 @@ export class KvEntityStorage implements EntityStorage {
   async listEntities<T extends ApiKindEntity>(apiVersion: T["apiVersion"],kind: T["kind"]): Promise<T[]> {
     const entities = new Array<T>;
     const coords: string[] = [apiVersion, kind];
-    for await (const entry of this.kv.list({ prefix: [...this.prefix, ...coords] })) {
+    for await (const entry of this.kv.list({ prefix: [...this.prefix, ...coords] }, {consistency: 'eventual'})) {
       entities.push(entry.value as T);
     }
     return entities;
   }
   async getEntity<T extends ApiKindEntity>(apiVersion: T["apiVersion"],kind: T["kind"],name: string): Promise<T|null> {
     const coords: string[] = [apiVersion, kind, name];
-    const entry = await this.kv.get([...this.prefix, ...coords]);
+    const entry = await this.kv.get([...this.prefix, ...coords], {consistency: 'eventual'});
     if (entry.versionstamp) {
       return entry.value as T;
     }
