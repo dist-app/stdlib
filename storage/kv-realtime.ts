@@ -86,13 +86,13 @@ export class KvRealtimeContext {
 
 
   async getKey(key: Deno.KvKey) {
-    const result = await this.kv.get(key);
+    const result = await this.kv.get(key, {consistency: 'eventual'});
     return result;
   }
 
   async collectList(opts: { prefix: Deno.KvKey }) {
     const entities = new Array<Deno.KvEntry<unknown>>();
-    for await (const entry of this.kv.list(opts)) {
+    for await (const entry of this.kv.list(opts,{consistency: 'eventual'})) {
       entities.push(entry);
     }
     return entities;
@@ -108,7 +108,7 @@ export class KvRealtimeContext {
     return ows
       .concat<KvRealtimeEvent | {type: 'ready'}>(
         ows
-          .fromIterable(this.kv.list({ prefix }))
+          .fromIterable(this.kv.list({ prefix }, {consistency: 'eventual'}))
           .pipeThrough(ows.map(entry => ({
               type: 'insert',
               appliedAt: new Date(),
