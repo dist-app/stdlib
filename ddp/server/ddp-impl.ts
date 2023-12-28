@@ -69,10 +69,10 @@ export class InboundDdpSocket {
     private readonly ddpInterface: DdpInterface,
     public readonly encapsulation: 'sockjs' | 'raw',
   ) {
-    socket.onopen = () => {
+    socket.addEventListener('open', () => {
       if (this.encapsulation == 'sockjs') socket.send('o');
-    };
-    socket.onmessage = (e) => {
+    });
+    socket.addEventListener('message', (e) => {
       const msgs = this.encapsulation == 'sockjs'
         ? JSON.parse(e.data) as string[]
         : [e.data as string];
@@ -80,19 +80,19 @@ export class InboundDdpSocket {
         const msg = EJSON.parse(msgText) as TracedClientSentPacket;
         this.handleClientPacket(msg);
       }
-    };
+    });
 
     this.closePromise = new Promise<void>((ok, fail) => {
-      socket.onerror = (evt: ErrorEventInit) => {
+      socket.addEventListener('error', (evt: ErrorEventInit) => {
         fail(new Error(`WebSocket errored: ${evt.message}`));
         this.closeCtlr.abort(evt);
         console.log("WebSocket errored:", evt.message);
-      };
-      socket.onclose = () => {
+      });
+      socket.addEventListener('close', () => {
         ok();
         this.closeCtlr.abort();
         console.log("WebSocket closed");
-      };
+      });
     });
 
     this.closeCtlr.signal.addEventListener('abort', () => {
@@ -150,7 +150,7 @@ export class InboundDdpSocket {
           },
         }, ctx, (span) => this.ddpInterface
           .callSubscribe(this, pkt.name, pkt.params, stopCtlr.signal)
-          .then<ServerSentPacket,ServerSentPacket>(x => ({
+          .then<ServerSentPacket,ServerSentPacket>(() => ({
             msg: "ready",
             subs: [pkt.id],
           }), err => (console.error('sub error:', err), {
