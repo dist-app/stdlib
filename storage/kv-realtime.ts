@@ -1,7 +1,7 @@
 import * as ows from "https://deno.land/x/stream_observables@v1.3/mod.ts";
 
 import { EntityStorage, ApiKindEntity, StreamEvent } from "../portable/types.ts";
-import { trace, SpanKind, propagation, context, TextMapGetter, ROOT_CONTEXT, SpanContext } from "https://deno.land/x/observability@v0.4.3/opentelemetry/api.js";
+import { trace, SpanKind, propagation, context, TextMapGetter, ROOT_CONTEXT, SpanContext } from "https://deno.land/x/observability@v0.5.0/opentelemetry/api.js";
 
 type KvRealtimeEvent =
 | {

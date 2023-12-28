@@ -1,6 +1,6 @@
 import {default as EJSON} from "https://cdn.skypack.dev/ejson@2.2.3";
 
-import { trace, SpanKind, SpanStatusCode, Span, context, propagation, Context } from "https://deno.land/x/observability@v0.4.3/opentelemetry/api.js";
+import { trace, SpanKind, SpanStatusCode, Span, context, propagation, Context } from "https://deno.land/x/observability@v0.5.0/opentelemetry/api.js";
 
 const clientTracer = trace.getTracer('ddp.client');
 const methodTracer = trace.getTracer('ddp.method');
