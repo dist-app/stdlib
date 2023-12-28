@@ -1,5 +1,5 @@
 import { default as EJSON } from "https://cdn.skypack.dev/ejson@2.2.3";
-import { ROOT_CONTEXT, SpanKind, TextMapGetter, propagation, trace } from "https://deno.land/x/observability@v0.5.0/opentelemetry/api.js";
+import { ROOT_CONTEXT, SpanKind, TextMapGetter, propagation, trace } from "https://deno.land/x/observability@v0.5.1/opentelemetry/api.js";
 
 import { ClientSentPacket, ServerSentPacket } from "../types.ts";
 
@@ -84,9 +84,10 @@ export class InboundDdpSocket {
 
     this.closePromise = new Promise<void>((ok, fail) => {
       socket.addEventListener('error', (evt: ErrorEventInit) => {
-        fail(new Error(`WebSocket errored: ${evt.message}`));
-        this.closeCtlr.abort(evt);
-        console.log("WebSocket errored:", evt.message);
+        const error = evt.error ?? new Error(evt.message || 'Unidentified WebSocket error.');
+        fail(new Error(`WebSocket errored: ${error.message}`));
+        this.closeCtlr.abort(error);
+        console.log("WebSocket errored:", error.message);
       });
       socket.addEventListener('close', () => {
         ok();

@@ -8,7 +8,7 @@ import {
   propagation,
   TextMapSetter,
   TextMapGetter,
-} from "https://deno.land/x/observability@v0.5.0/opentelemetry/api.js";
+} from "https://deno.land/x/observability@v0.5.1/opentelemetry/api.js";
 
 // copy of https://github.com/danopia/dist-app-meteor/blob/7b467622fd2affdf8d6f85baa70052521be9bfb7/imports/lib/tracing.ts#L69
 
