@@ -50,19 +50,18 @@ export class LogicTracer {
   }
 
   InternalSpan<
+    Tthis,
     Targs extends unknown[],
-    Tret,
+    Tret extends unknown,
   >(
-    _target: any,
-    propertyName: string,
-    descriptor: TypedPropertyDescriptor<(...args: Targs) => Promise<Tret>>,
+    originalMethod: (...args: Targs) => Promise<Tret>,
+    context: ClassMethodDecoratorContext<Tthis, (this: Tthis, ...args: Targs) => Promise<Tret>>,
   ) {
-    let method = descriptor.value!;
-    const tracer = this;
-    descriptor.value = function (...args: Targs) {
-      return tracer.wrapAsyncWithSpan(propertyName, {
+    const asyncSpan = this.asyncSpan.bind(this);
+    return function (this: Tthis, ...args: Targs): Promise<Tret> {
+      return asyncSpan(context.name.toString(), {
         kind: SpanKind.INTERNAL,
-      }, method, this)(...args);
+      }, () => originalMethod.apply(this, args));
     };
   }
 
