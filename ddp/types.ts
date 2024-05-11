@@ -69,7 +69,7 @@ export type ServerSentPacket = {
   collection: string;
   id: string;
   fields?: Record<string, unknown>;
-  cleared?: Record<string, unknown>;
+  cleared?: Array<string>;
 } | {
   msg: 'removed';
   collection: string;

@@ -18,6 +18,7 @@
 //   } & Record<string,unknown>;
 // }
 
+import { EntityApiDefinition } from "./schema/api-definition.ts";
 import type { ApiKindEntity, EntityStorage, StreamEvent } from "./types.ts";
 
 // import { EntityStorage, LayeredNamespace, NamespaceSpecWithImpl } from "../storage.ts";
@@ -75,7 +76,10 @@ export class EntityEngine {
     // primaryCatalog
   ) { }
 
-  apiImpls = new Map<string, EntityStorage>();
+  apiImpls = new Map<string, {
+    storage: EntityStorage;
+    definition: EntityApiDefinition;
+  }>();
   // loadedMap = new Map<string, ShellSession>();
   // loader = new AsyncKeyedCache<ApiKindEntity, string, | ShellSession>({
   //   keyFunc: x => [x.metadata.namespace, x.apiVersion, x.kind, x.metadata.name].join('_'),
@@ -92,14 +96,17 @@ export class EntityEngine {
   //   },
   // })
 
-  addApi(apiName: string, storage: EntityStorage) {
+  addApi(apiName: string, storage: EntityStorage, definition: EntityApiDefinition) {
     if (this.apiImpls.has(apiName)) {
       throw new Error(`api ${apiName} already exists`);
     }
     // switch (opts.spec.layers) {
 
     // }
-    this.apiImpls.set(apiName, storage);
+    this.apiImpls.set(apiName, {
+      storage, // TODO: storages convey which datatypes they can store, other limitations thru a resuable EntityConverter
+      definition: definition ?? {}, // TODO: is defaulting still needed?
+    });
   }
 
   selectNamespaceLayer<T extends ApiKindEntity>(props: {
@@ -117,7 +124,9 @@ export class EntityEngine {
     const layer = this.selectNamespaceLayer({
       apiVersion: entity.apiVersion,
     });
-    await layer?.insertEntity<T>(entity);
+    const definition = layer.definition.kinds[entity.kind];
+    if (!definition) console.error(`WARN: lacking definitions for ${entity.apiVersion} ${entity.kind}`);
+    await layer?.storage.insertEntity<T>(definition, entity);
     return this.getEntityHandle<T>(
       entity.apiVersion, entity.kind,
       entity.metadata.name);
@@ -130,7 +139,9 @@ export class EntityEngine {
     const layer = this.selectNamespaceLayer({
       apiVersion: apiVersion,
     });
-    const list = await layer.listEntities<T>(apiVersion, kind);
+    const definition = layer.definition.kinds[kind];
+    if (!definition) console.error(`WARN: lacking definitions for ${apiVersion} ${kind}`);
+    const list = await layer.storage.listEntities<T>(definition, apiVersion, kind);
     return list;
   }
 
@@ -141,7 +152,9 @@ export class EntityEngine {
     const layer = this.selectNamespaceLayer({
       apiVersion: apiVersion,
     });
-    const list = await layer.listEntities<T>(apiVersion, kind);
+    const definition = layer.definition.kinds[kind];
+    if (!definition) console.error(`WARN: lacking definitions for ${apiVersion} ${kind}`);
+    const list = await layer.storage.listEntities<T>(definition, apiVersion, kind);
     return list.map(snapshot => {
       const handle = this.getEntityHandle<T>(apiVersion, kind, snapshot.metadata.name);
       handle.snapshot = snapshot;
@@ -152,15 +165,17 @@ export class EntityEngine {
   observeEntities<T extends ApiKindEntity>(
     apiVersion: T["apiVersion"],
     kind: T["kind"],
-    opts?: {
-      signal?: AbortSignal;
+    opts: {
+      signal: AbortSignal;
       // filterCb?: (entity: T) => boolean;
     },
   ): ReadableStream<StreamEvent<T>> {
     const layer = this.selectNamespaceLayer({
       apiVersion: apiVersion,
     });
-    return layer.observeEntities(apiVersion, kind, opts?.signal);
+    const definition = layer.definition.kinds[kind];
+    if (!definition) console.error(`WARN: lacking definitions for ${apiVersion} ${kind}`);
+    return layer.storage.observeEntities(definition, apiVersion, kind, opts.signal);
   }
 
   async getEntity<T extends ApiKindEntity>(
@@ -180,7 +195,9 @@ export class EntityEngine {
         apiVersion: apiVersion,
       });
       if (!layer) return null;
-      const entity = await layer.getEntity(apiVersion, kind, name)
+      const definition = layer.definition.kinds[kind];
+      if (!definition) console.error(`WARN: lacking definitions for ${apiVersion} ${kind}`);
+      const entity = await layer.storage.getEntity(definition, apiVersion, kind, name)
       if (!entity) return null;
       return entity;
     // });
@@ -209,8 +226,9 @@ export class EntityEngine {
       const layer = this.selectNamespaceLayer({
         apiVersion: newEntity.apiVersion,
       });
-
-      await layer.updateEntity(newEntity);
+      const definition = layer.definition.kinds[newEntity.kind];
+      if (!definition) console.error(`WARN: lacking definitions for ${newEntity.apiVersion} ${newEntity.kind}`);
+      await layer.storage.updateEntity(definition, newEntity);
       // const count = await layer.impl.updateEntity(newEntity);
       // if (!count)
       //   throw new Error(`TODO: Update applied to zero entities`);
@@ -237,11 +255,13 @@ export class EntityEngine {
       const layer = this.selectNamespaceLayer({
         apiVersion,
       });
+      const definition = layer.definition.kinds[kind];
+      if (!definition) console.error(`WARN: lacking definitions for ${apiVersion} ${kind}`);
 
-      let entity = await layer.getEntity(apiVersion, kind, name);
+      let entity = await layer.storage.getEntity(definition, apiVersion, kind, name);
       if (!entity) {
         if (creationCb) {
-          await layer.insertEntity(creationCb());
+          await layer.storage.insertEntity(definition, creationCb());
           return;
         } else {
           throw new Error(`Entity doesn't exist`);
@@ -259,7 +279,7 @@ export class EntityEngine {
 
         // TODO: retry this if we raced someone else
         try {
-          await layer.updateEntity(entity);
+          await layer.storage.updateEntity(definition, entity);
           return;
         } catch (err) {
           // TODO: hook back up when ddp client has proper errors
@@ -275,7 +295,7 @@ export class EntityEngine {
           // }
         }
 
-        entity = await layer.getEntity(apiVersion, kind, name);
+        entity = await layer.storage.getEntity(definition, apiVersion, kind, name);
         if (!entity)
           throw new Error(`Entity doesn't exist (anymore)`);
         continue;
@@ -363,7 +383,9 @@ export class EntityEngine {
       const layer = this.selectNamespaceLayer({
         apiVersion,
       });
-      return await layer.deleteEntity(apiVersion, kind, name);
+      const definition = layer.definition.kinds[kind];
+      if (!definition) console.error(`WARN: lacking definitions for ${apiVersion} ${kind}`);
+      return await layer.storage.deleteEntity(definition, apiVersion, kind, name);
     // });
   }
 
