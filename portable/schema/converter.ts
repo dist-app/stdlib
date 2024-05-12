@@ -40,6 +40,9 @@ export function fromStorage(data: unknown, schema: OpenAPI2SchemaObject, opts: C
       if (!data) return null;
       const childSchema = schema.items;
       if (!Array.isArray(data) || !childSchema) return null;
+      if (Array.isArray(childSchema)) {
+        return data.map((item, idx) => fromStorage(item, childSchema[idx], opts));
+      }
       return data.map(item => fromStorage(item, childSchema, opts));
     }
     case 'object': {
@@ -85,6 +88,11 @@ export function toStorage(data: unknown, schema: OpenAPI2SchemaObject, opts: Con
       if (!Array.isArray(data)) throw new Error(`expected Array got ${typeof data}`);
       const childSchema = schema.items;
       if (!childSchema) throw new Error(`array not typed`);
+      if (Array.isArray(childSchema)) {
+        // throw new Error(`array (tuple?) typed wrong`);
+        if (childSchema.length !== data.length) throw new Error(`Array of wrong length (${data.length})`);
+        return data.map((item, idx) => toStorage(item, childSchema[idx], opts));
+      }
       return data.map(item => toStorage(item, childSchema, opts));
     }
     case 'object': {

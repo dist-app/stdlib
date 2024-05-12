@@ -47,7 +47,8 @@ export interface OpenAPI2SchemaObject {
   description?: string | null;
   enum?: string[] | null;
   format?: "byte" | "date-time" | "double" | "int32" | "int64" | "int-or-string" | null;
-  items?: OpenAPI2SchemaObject | null;
+  items?: OpenAPI2SchemaObject | null | OpenAPI2SchemaObject[]; // TODO: array form is an outdated tuple syntax
+  additionalItems?: OpenAPI2SchemaObject | boolean | null; // used for tuples too?
   oneOf?: (OpenAPI2SchemaObject)[] | null;
   anyOf?: (OpenAPI2SchemaObject)[] | null;
   properties?: { [index: string]: OpenAPI2SchemaObject } | null;
@@ -57,6 +58,9 @@ export interface OpenAPI2SchemaObject {
   // [key: string]: any; // allow arbitrary x-something properties
 
   nullable?: boolean | null;
+
+  minItems?: number | null;
+  maxItems?: number | null;
 
   // Kubernetes CRD extensions
   "x-kubernetes-embedded-resource"?: boolean | null;
