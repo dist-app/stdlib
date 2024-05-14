@@ -1,4 +1,0 @@
-["{\"msg\":\"method\",\"id\":\"3\",\"method\":\"tasks/create\",\"params\":[\"Cleo\",\"test\",\"\"],\"randomSeed\":\"4c09c69744e9183580da\",\"baggage\":{\"traceparent\":\"00-d0d495534f103a2e327ef887004c2c5d-ca25ec01a8a578cb-01\"}}"]
-a["{\"msg\":\"result\",\"id\":\"3\",\"result\":\"aQsZmkSreyFoQ3aau\"}"]
-a["{\"msg\":\"added\",\"collection\":\"Tasks\",\"id\":\"aQsZmkSreyFoQ3aau\",\"fields\":{\"userId\":\"dan\",\"title\":\"test\",\"group\":\"Cleo\",\"createdAt\":{\"$date\":1715067172841}}}"]
-a["{\"msg\":\"updated\",\"methods\":[\"3\"]}"]

@@ -262,6 +262,7 @@ export class DdpSocket {
           .finally(() => span.end()));
         break;
       default:
+        console.error({pkt});
         throw new Error(`TODO: client sent unexpected packet ${pkt.msg}`);
     }
   }

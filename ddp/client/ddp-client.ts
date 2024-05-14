@@ -128,6 +128,7 @@ export class DDPClient {
     private readonly wss: WebSocketStream,
     private readonly readable: ReadableStream<string>,
     private readonly writable: WritableStream<string>,
+    public readonly encapsulation: 'sockjs' | 'raw',
   ) {
     this.writer = this.writable.getWriter();
   }
@@ -217,6 +218,14 @@ export class DDPClient {
   }
 
   async runInboundLoop() {
+    if (this.encapsulation == 'raw') {
+      for await (const chunk of this.readable) {
+        const packet = EJSON.parse(chunk);
+        await this.handlePacket(packet);
+      }
+      return;
+    }
+
     for await (const chunk of this.readable) switch (chunk[0]) {
       case 'o': throw new Error(`got second open?`);
       case 'a': {
@@ -324,14 +333,23 @@ export class DDPClient {
     const fullPacket = { ...packet, baggage };
 
     if (Deno.args.includes('--debug')) console.debug('-->', fullPacket.msg, fullPacket.baggage);
-    await this.writer.write(JSON.stringify([EJSON.stringify(fullPacket)]));
+    if (this.encapsulation == 'raw') {
+      await this.writer.write(EJSON.stringify(fullPacket));
+    } else {
+      await this.writer.write(JSON.stringify([EJSON.stringify(fullPacket)]));
+    }
   }
 
-  static async connectToUrl(appUrl: string) {
-    const shardId = Math.floor(Math.random()*1000);
-    const sessionId = Math.random().toString(16).slice(2, 10);
+  static async connectToUrl(appUrl: string, encapsulation: 'sockjs' | 'raw') {
+    let sockPath = 'websocket';
 
-    const sockUrl = new URL(`sockjs/${shardId}/${sessionId}/websocket`, appUrl);
+    if (encapsulation == 'sockjs') {
+      const shardId = Math.floor(Math.random()*1000);
+      const sessionId = Math.random().toString(16).slice(2, 10);
+      sockPath = `sockjs/${shardId}/${sessionId}/${sockPath}`;
+    }
+
+    const sockUrl = new URL(sockPath, appUrl);
     sockUrl.protocol = sockUrl.protocol.replace(/^http/, 'ws');
     const wss = new WebSocketStream(sockUrl.toString());
 
@@ -339,7 +357,7 @@ export class DDPClient {
     const {readable, writable} = await wss.opened.finally(() => connectSpan.end());
 
     // TODO: typecheck
-    const ddp = new this(wss, readable as ReadableStream<string>, writable);
+    const ddp = new this(wss, readable as ReadableStream<string>, writable, encapsulation);
 
     const setupReader = readable.getReader() as ReadableStreamDefaultReader<string>;
 
@@ -351,17 +369,25 @@ export class DDPClient {
         support: ["1"],
       });
 
-      {
-        const {value} = await setupReader.read();
-        if (value !== 'o') throw new Error(`Unexpected banner: ${JSON.stringify(value)}`)
-      }
+      if (encapsulation == 'sockjs') {
+        {
+          const {value} = await setupReader.read();
+          if (value !== 'o') throw new Error(`Unexpected banner: ${JSON.stringify(value)}`)
+        }
 
-      // TODO: the parsing should be handled by a transformstream, read from that instead
-      const {value} = await setupReader.read();
-      if (value?.[0] !== 'a') throw new Error(`Unexpected connect resp: ${JSON.stringify(value)}`)
-      const packet: ServerSentPacket = JSON.parse(JSON.parse(value.slice(1))[0]);
-      if (packet.msg !== 'connected') throw new Error(`Unexpected connect msg: ${JSON.stringify(packet)}`);
-      // const session = packet.session as string;
+        // TODO: the parsing should be handled by a transformstream, read from that instead
+        const {value} = await setupReader.read();
+        if (value?.[0] !== 'a') throw new Error(`Unexpected connect resp: ${JSON.stringify(value)}`)
+        const packet: ServerSentPacket = JSON.parse(EJSON.parse(value.slice(1))[0]);
+        if (packet.msg !== 'connected') throw new Error(`Unexpected connect msg: ${JSON.stringify(packet)}`);
+        // const session = packet.session as string;
+
+      } else {
+        const {value} = await setupReader.read();
+        if (value?.[0] !== '{') throw new Error(`Unexpected connect resp: ${JSON.stringify(value)}`)
+        const packet: ServerSentPacket = EJSON.parse(value);
+        if (packet.msg !== 'connected') throw new Error(`Unexpected connect msg: ${JSON.stringify(packet)}`);
+      }
     } finally {
       handshakeSpan.end();
     }
