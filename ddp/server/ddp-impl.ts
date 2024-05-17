@@ -17,6 +17,8 @@ type TracedClientSentPacket = ClientSentPacket & {
 const methodtracer = trace.getTracer('ddp.method');
 const subtracer = trace.getTracer('ddp.subscription');
 
+const serverId = crypto.randomUUID().split('-')[0];
+
 export class DdpInterface {
   private readonly methods = new Map<string, MethodHandler>();
   private readonly publications = new Map<string, PublicationHandler>();
@@ -206,6 +208,16 @@ export class DdpSocket {
         this.send([{
           msg: "connected",
           session: Math.random().toString(16).slice(2),
+        }, {
+          msg: "added",
+          collection: '_dist-app-deno',
+          id: 'ddp-server-identity',
+          fields: {
+            serverId,
+            region: Deno.env.get('DENO_REGION'),
+            deploymentId: Deno.env.get('DENO_DEPLOYMENT_ID'),
+            denoVersion: Deno.version.deno,
+          },
         }]);
         break;
       case 'ping':
