@@ -1,7 +1,7 @@
 import {
   verify as verifyJwt,
   // type Payload,
-} from "https://deno.land/x/djwt@v2.4/mod.ts";
+} from "https://deno.land/x/djwt@v3.0.1/mod.ts";
 
 export type JwtPayload = {
   "iss": string;
