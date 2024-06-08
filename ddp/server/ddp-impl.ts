@@ -1,4 +1,4 @@
-import { default as EJSON } from "https://cdn.skypack.dev/ejson@2.2.3";
+import { default as EJSON } from "https://esm.sh/ejson@2.2.3";
 import { ROOT_CONTEXT, SpanKind, TextMapGetter, propagation, trace } from "https://deno.land/x/observability@v0.6.1/opentelemetry/api.js";
 
 import { ClientSentPacket, MeteorError, ServerSentPacket } from "../types.ts";

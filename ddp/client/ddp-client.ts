@@ -1,4 +1,4 @@
-import {default as EJSON} from "https://cdn.skypack.dev/ejson@2.2.3";
+import { default as EJSON } from "https://esm.sh/ejson@2.2.3";
 
 import { trace, SpanKind, SpanStatusCode, Span, context, propagation, Context } from "https://deno.land/x/observability@v0.6.1/opentelemetry/api.js";
 
@@ -6,7 +6,7 @@ const clientTracer = trace.getTracer('ddp.client');
 const methodTracer = trace.getTracer('ddp.method');
 const subTracer = trace.getTracer('ddp.subscription');
 
-import { ClientSentPacket, MeteorError, ServerSentPacket, DocumentPacket } from "../types.ts";
+import { ClientSentPacket, ServerSentPacket, DocumentPacket } from "../types.ts";
 
 class DDPCollection {
   public readonly fields = new Map<string,Record<string,unknown>>();
@@ -51,7 +51,7 @@ export class MongoCollection<T extends {_id: string}> {
       for (const [field, spec] of Object.entries(selector)) {
         if (field.startsWith('$')) throw new Error(`TODO: selectors 1`);
         // console.log({spec, selector})
-        if (Object.keys(spec as {}).some(x => x.startsWith('$'))) throw new Error(`TODO: selectors 2`);
+        if (Object.keys(spec as {_:1}).some(x => x.startsWith('$'))) throw new Error(`TODO: selectors 2`);
         if (field == '_id') {
           if (spec !== _id) matches = false;
           continue;
@@ -112,9 +112,9 @@ function makeReturnDoc<T extends {_id: string}>(_id: string, original: T, opts?:
     }
   }
   if (includeOthers) {
-    for (const pair of Object.entries(original)) {
+    for (const pair of Object.entries<unknown>(original)) {
       if (pair[0] in fieldsSpec) continue;
-      subset[pair[0] as keyof T] = EJSON.clone(pair[1]);
+      subset[pair[0] as keyof T] = EJSON.clone(pair[1]) as T[keyof T];
     }
     if (!('_id' in fieldsSpec)) {
       subset['_id'] = _id;
@@ -136,6 +136,7 @@ export class DDPClient {
 
   private readonly collections = new Map<string, DDPCollection>();
   private readonly pendingMethods = new Map<string, {
+    // deno-lint-ignore no-explicit-any
     ok: (result: any) => void;
     fail: (error: Error) => void;
     span: Span;
@@ -312,11 +313,12 @@ export class DDPClient {
       case 'addedBefore':
       case 'changed':
       case 'removed':
-      case 'movedBefore':
+      case 'movedBefore': {
         console.debug('docevent:', packet.msg, packet.id);
         const coll = this.grabCollection(packet.collection);
         coll.handlePacket(packet);
         break;
+      }
 
       default:
         console.log('<--', packet);

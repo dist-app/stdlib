@@ -1,5 +1,5 @@
 import type { OpenAPI2SchemaObject } from "./openapi.ts";
-import * as base64 from "jsr:@std/encoding/base64";
+import * as base64 from "https://deno.land/std@0.208.0/encoding/base64.ts";
 
 export interface ConversionOpts {
   nativeBinary: boolean;
@@ -71,7 +71,7 @@ export function toStorage(data: unknown, schema: OpenAPI2SchemaObject, opts: Con
     case 'string':
     case 'boolean':
     case 'number':
-      if (typeof data == schema.type) return data;
+      if ((typeof data) == schema.type) return data;
       throw new Error(`expected ${schema.type} got ${typeof data}`);
     case 'integer':
       if (typeof data == 'number') return data % 0;
