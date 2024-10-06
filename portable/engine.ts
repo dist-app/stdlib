@@ -281,7 +281,7 @@ export class EntityEngine {
         try {
           await layer.storage.updateEntity(definition, entity);
           return;
-        } catch (err) {
+        } catch (err: unknown) {
           // TODO: hook back up when ddp client has proper errors
           console.log('catching mutate err', JSON.stringify(err), err);
           // if (err instanceof Meteor.Error && err.error == 'no-update') {
@@ -291,7 +291,7 @@ export class EntityEngine {
           //     continue;
           //   }
           // } else {
-            throw new Error(`Mutation failed: ${err.message}`);
+            throw new Error(`Mutation failed: ${(err as Error).message}`);
           // }
         }
 
