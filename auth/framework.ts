@@ -194,10 +194,10 @@ export class AuthFramework implements AuthSystem {
           try {
             const resp = await handler(ctx, user, reqJson);
             return Response.json(resp, { headers: ctx.respHeaders });
-          } catch (err) {
+          } catch (err: unknown) {
             console.log({reqJson}, err);
             return ctx.respondText(400, JSON.stringify({
-              "error": `${err.message || err}`,
+              "error": `${(err as Error).message || err}`,
             }));
           }
         } else {
