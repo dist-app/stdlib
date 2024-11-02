@@ -17,7 +17,12 @@ export class CookieAuthnMethod implements AuthnMethod {
   //   throw new Error('Method not implemented.');
   // }
   private async recognizeSession(auth: AuthSystem, ctx: AuthRequestContext) {
-    const sessionCookie = ctx.cookies['DistAppUserSession'];
+
+    // Support for passing the cookie as a header, for experimental things e.g. kubectl
+    const authHeader = ctx.request.headers.get('authorization');
+    const authHeaderToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : '';
+
+    const sessionCookie = ctx.cookies['DistAppUserSession'] ?? authHeaderToken;
     if (!sessionCookie) return false;
 
     const parts = sessionCookie.split(':');
