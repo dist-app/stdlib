@@ -271,7 +271,9 @@ export class OidcAuthnMethod implements AuthnMethod {
         deleted++;
       }
     }
-    console.log("Deleted", deleted, "oidc flows older than", cutoffDate);
+    if (deleted) {
+      console.debug("Deleted", deleted, "oidc flows older than", cutoffDate);
+    }
   }
 
   settingsTabs = [ForeignIdentityTab];

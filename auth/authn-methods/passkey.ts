@@ -47,7 +47,9 @@ export class PasskeyAuthnMethod implements AuthnMethod {
         deleted++;
       }
     }
-    console.log("Deleted", deleted, "passkey challenges older than", cutoffDate);
+    if (deleted) {
+      console.debug("Deleted", deleted, "passkey challenges older than", cutoffDate);
+    }
   }
 
   // bindTo(framework: AuthFramework) {
