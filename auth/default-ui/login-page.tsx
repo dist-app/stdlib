@@ -31,7 +31,6 @@ export function renderLoginPage(auth: AuthSystem, ctx: AuthRequestContext) {
 
       {auth.hasAuthnMethod('oidc') ? (
         <form id="oidc-form" method="post" action="/auth/login/oidc" style="display: none;">
-          <input type="hidden" name="desired_issuer" value="https://login.dist.app" />
           <input type="hidden" name="redirect_path" value={ctx.requestUrl.searchParams.get('redirect')} />
         </form>
       ) : []}
@@ -41,9 +40,9 @@ export function renderLoginPage(auth: AuthSystem, ctx: AuthRequestContext) {
 
         {auth.hasAuthnMethod('oidc') ? (<>
           <p>
-            Hello
+            Select an identity provider:
           </p>
-          <button form="oidc-form" type="submit">sign in with login.dist.app</button>
+          <button form="oidc-form" type="submit" name="desired_issuer" value="https://login.dist.app">sign in with login.dist.app</button>
         </>) : []}
 
         {auth.hasAuthnMethod('passkey') ? (<>
