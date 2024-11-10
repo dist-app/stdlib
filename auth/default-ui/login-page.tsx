@@ -7,7 +7,11 @@ import { AuthRequestContext, AuthSystem } from "../types.ts";
 // UI bits based on https://github.com/stardustapp/graveyard/blob/9b3e7939dca4f49cca0f23f699b3910a2d1d8603/dust-server/src/daemon/gate-site.js
 
 export function renderLoginPage(auth: AuthSystem, ctx: AuthRequestContext) {
-  console.log({oidc: auth.hasAuthnMethod('oidc')})
+  console.log({
+    oidc: auth.hasAuthnMethod('oidc'),
+    cliCode: auth.hasAuthnMethod('cli-code'),
+    passkey: auth.hasAuthnMethod('passkey'),
+  })
   return html({
     headers: ctx.respHeaders,
     lang: "en",
@@ -37,6 +41,13 @@ export function renderLoginPage(auth: AuthSystem, ctx: AuthRequestContext) {
 
       <form class="modal-form" id="auth-form" style="display: none;">
         <h1>sign in to <em>{auth.selfBaseUrl}</em></h1>
+
+        {auth.hasAuthnMethod('cli-code') ? (<>
+          <p>
+            For local development, click the sign-in link from the server logs.
+          </p>
+          <hr />
+        </>) : []}
 
         {auth.hasAuthnMethod('oidc') ? (<>
           <p>

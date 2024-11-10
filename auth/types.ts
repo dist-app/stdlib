@@ -7,6 +7,7 @@ export type AuthnMethodId =
   | 'cookie'
   | 'oidc'
   | 'passkey'
+  | 'cli-code'
 ;
 
 export interface SettingsTab {
