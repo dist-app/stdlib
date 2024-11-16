@@ -121,7 +121,7 @@ export class SchemaApi {
   static readonly definition: EntityApiDefinition<
     | EntityKindEntity
   > = {
-    name: 'schema.dist.app',
+    name: 'schema.dist.app/v1alpha1',
     kinds: {
       'EntityKind': EntityKindEntityKind,
     },

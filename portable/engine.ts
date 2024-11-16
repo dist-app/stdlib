@@ -18,7 +18,8 @@
 //   } & Record<string,unknown>;
 // }
 
-import { EntityApiDefinition } from "./schema/api-definition.ts";
+import { KvEntityStorage } from "../../server-sdk/modules/storage-deno-kv/nonrealtime.ts";
+import { EntityApiDefinition, SchemaApi, type EntityKindEntity } from "./schema/api-definition.ts";
 import type { ApiKindEntity, EntityStorage, StreamEvent } from "./types.ts";
 
 // import { EntityStorage, LayeredNamespace, NamespaceSpecWithImpl } from "../storage.ts";
@@ -74,7 +75,9 @@ export type MutationOptions<T extends ApiKindEntity> =
 export class EntityEngine {
   constructor(
     // primaryCatalog
-  ) { }
+  ) {
+    this.addApi('schema.dist.app', new SchemaReflectionApiStorage(this), SchemaApi.definition);
+  }
 
   apiImpls = new Map<string, {
     storage: EntityStorage;
@@ -527,5 +530,34 @@ export class EntityHandle<Tself extends ApiKindEntity> {
     if (!ownerName) return null;
 
     return this.engine.getEntityHandle<Towner>(apiVersion, apiKind, ownerName);
+  }
+}
+
+class SchemaReflectionApiStorage implements EntityStorage {
+  constructor(private readonly engine: EntityEngine) {}
+  insertEntity<T extends ApiKindEntity>(definition: EntityKindEntity, entity: T): Promise<void> {
+    throw new Error("Method insertEntity not implemented.");
+  }
+  listAllEntities(): Promise<ApiKindEntity[]> {
+    return Promise.resolve([...this.engine.apiImpls.values()].flatMap(x => Object.values(x.definition.kinds)));
+  }
+  listEntities<T extends ApiKindEntity>(definition: EntityKindEntity, apiVersion: T["apiVersion"], kind: T["kind"]): Promise<T[]> {
+    if (apiVersion == 'schema.dist.app/v1alpha1' && kind == 'EntityKind') {
+      return Promise.resolve([...this.engine.apiImpls.values()].flatMap(x => Object.values(x.definition.kinds)) as unknown[] as T[]);
+    }
+    console.log('listEntities', {apiVersion, kind});
+    throw new Error("Method listEntities not implemented.");
+  }
+  observeEntities<T extends ApiKindEntity>(definition: EntityKindEntity, apiVersion: T["apiVersion"], kind: T["kind"], signal: AbortSignal): ReadableStream<StreamEvent<T>> {
+    throw new Error("Method observeEntities not implemented.");
+  }
+  getEntity<T extends ApiKindEntity>(definition: EntityKindEntity, apiVersion: T["apiVersion"], kind: T["kind"], name: string): Promise<T | null> {
+    throw new Error("Method getEntity not implemented.");
+  }
+  updateEntity<T extends ApiKindEntity>(definition: EntityKindEntity, newEntity: T): Promise<void> {
+    throw new Error("Method updateEntity not implemented.");
+  }
+  deleteEntity<T extends ApiKindEntity>(definition: EntityKindEntity, apiVersion: T["apiVersion"], kind: T["kind"], name: string): Promise<boolean> {
+    throw new Error("Method deleteEntity not implemented.");
   }
 }
