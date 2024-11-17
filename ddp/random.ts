@@ -1,4 +1,15 @@
-import alea from 'npm:alea@1.0.1';
+// import alea from 'npm:alea@1.0.1';
+import {default as _alea} from 'https://esm.sh/alea@1.0.1';
+const alea = _alea as unknown as (...args: unknown[]) => {
+  (): number;
+  next(): number;
+  uint32(): number;
+  fract53(): number;
+  version: string;
+  args: unknown[];
+  exportState(): [number, number, number, number];
+  importState(state: [number, number, number, number]): void;
+};
 
 // subset of https://github.com/meteor/meteor/blob/02aa69c0c2d2c3ea805ba8bcf0dbaa565ca995b3/packages/random/AbstractRandomGenerator.js
 export class Random {
