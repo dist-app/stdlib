@@ -229,7 +229,7 @@ export class OidcAuthnMethod implements AuthnMethod {
       // Should help make timeout symptoms more consistent
       maxAge: Math.round(timeoutMs / 1000) + 5,
     });
-    console.log(`Setting cookie ${FlowCookieName}_${state} on`, ctx);
+    console.log(`Setting cookie ${FlowCookieName}_${state} on`, ctx.cookies);
 
     return state;
   }
