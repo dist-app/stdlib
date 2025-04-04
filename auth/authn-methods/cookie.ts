@@ -26,17 +26,17 @@ export class CookieAuthnMethod implements AuthnMethod {
     if (!sessionCookie) return false;
 
     const parts = sessionCookie.split(':');
-    if (parts.length !== 2) throw new Error(`Corrupt session cookie?`);
+    if (parts.length !== 2) return false;
     const [sessionName, bearerToken] = parts.map(x => decodeURIComponent(x));
 
     const session = await auth.index
       .getEntity<UserSessionEntity>('login-server.dist.app/v1alpha1', 'UserSession', sessionName);
-    if (!session) return false
-    if (session.spec.bearerToken !== bearerToken) throw new Error(`Unrecognized session token`);
+    if (!session) return false;
+    if (session.spec.bearerToken !== bearerToken) return false;
 
     const user = await auth.index
       .getEntity<UserEntity>('login-server.dist.app/v1alpha1', 'User', session.spec.userName);
-    if (!user) throw new Error(`no user found`);
+    if (!user) return false;
 
     return {user, session: session};
   }
