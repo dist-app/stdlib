@@ -108,7 +108,7 @@ export class EntityEngine {
     // }
     this.apiImpls.set(apiName, {
       storage, // TODO: storages convey which datatypes they can store, other limitations thru a resuable EntityConverter
-      definition: definition ?? {}, // TODO: is defaulting still needed?
+      definition: definition ?? {kinds: {}}, // TODO: throw instead of defaulting
     });
   }
 
