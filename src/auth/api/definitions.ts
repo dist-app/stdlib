@@ -3,6 +3,8 @@ import {
   type EntityEngine,
   type MutationOptions,
   type EntityKindEntity,
+  EntityHandle,
+  StreamEvent,
 } from "../../engine/types.ts";
 
 import * as entities from "./entities.ts";
@@ -671,213 +673,213 @@ export class LoginServerApi {
     private readonly engine: EntityEngine,
   ) {}
 
-  async createUser(entity: Pick<entities.UserEntity, 'metadata' | 'spec'>) {
+  async createUser(entity: Pick<entities.UserEntity, 'metadata' | 'spec'>): Promise<EntityHandle<entities.UserEntity>> {
     return await this.engine.insertEntity<entities.UserEntity>({
       ...entity,
       apiVersion: 'login-server.dist.app/v1alpha1',
       kind: 'User',
     });
   }
-  async listUsers() {
+  async listUsers(): Promise<Array<entities.UserEntity>> {
     return await this.engine.listEntities<entities.UserEntity>('login-server.dist.app/v1alpha1', 'User');
   }
-  observeUsers(signal: AbortSignal) {
+  observeUsers(signal: AbortSignal): ReadableStream<StreamEvent<entities.UserEntity>> {
     return this.engine.observeEntities<entities.UserEntity>('login-server.dist.app/v1alpha1', 'User', { signal });
   }
-  async getUser(name: string) {
+  async getUser(name: string): Promise<entities.UserEntity | null> {
     return await this.engine.getEntity<entities.UserEntity>('login-server.dist.app/v1alpha1', 'User', name);
   }
-  async updateUser(entity: Pick<entities.UserEntity, 'metadata' | 'spec'>) {
+  async updateUser(entity: Pick<entities.UserEntity, 'metadata' | 'spec'>): Promise<void> {
     return await this.engine.updateEntity<entities.UserEntity>({
       ...entity,
       apiVersion: 'login-server.dist.app/v1alpha1',
       kind: 'User',
     });
   }
-  async mutateUser(name: string, mutation: MutationOptions<entities.UserEntity>) {
+  async mutateUser(name: string, mutation: MutationOptions<entities.UserEntity>): Promise<void> {
     return await this.engine.mutateEntity<entities.UserEntity>('login-server.dist.app/v1alpha1', 'User', name, mutation);
   }
-  async deleteUser(name: string) {
+  async deleteUser(name: string): Promise<boolean> {
     return await this.engine.deleteEntity<entities.UserEntity>('login-server.dist.app/v1alpha1', 'User', name);
   }
 
-  async createUserSession(entity: Pick<entities.UserSessionEntity, 'metadata' | 'spec'>) {
+  async createUserSession(entity: Pick<entities.UserSessionEntity, 'metadata' | 'spec'>): Promise<EntityHandle<entities.UserSessionEntity>> {
     return await this.engine.insertEntity<entities.UserSessionEntity>({
       ...entity,
       apiVersion: 'login-server.dist.app/v1alpha1',
       kind: 'UserSession',
     });
   }
-  async listUserSessions() {
+  async listUserSessions(): Promise<Array<entities.UserSessionEntity>> {
     return await this.engine.listEntities<entities.UserSessionEntity>('login-server.dist.app/v1alpha1', 'UserSession');
   }
-  observeUserSessions(signal: AbortSignal) {
+  observeUserSessions(signal: AbortSignal): ReadableStream<StreamEvent<entities.UserSessionEntity>> {
     return this.engine.observeEntities<entities.UserSessionEntity>('login-server.dist.app/v1alpha1', 'UserSession', { signal });
   }
-  async getUserSession(name: string) {
+  async getUserSession(name: string): Promise<entities.UserSessionEntity | null> {
     return await this.engine.getEntity<entities.UserSessionEntity>('login-server.dist.app/v1alpha1', 'UserSession', name);
   }
-  async updateUserSession(entity: Pick<entities.UserSessionEntity, 'metadata' | 'spec'>) {
+  async updateUserSession(entity: Pick<entities.UserSessionEntity, 'metadata' | 'spec'>): Promise<void> {
     return await this.engine.updateEntity<entities.UserSessionEntity>({
       ...entity,
       apiVersion: 'login-server.dist.app/v1alpha1',
       kind: 'UserSession',
     });
   }
-  async mutateUserSession(name: string, mutation: MutationOptions<entities.UserSessionEntity>) {
+  async mutateUserSession(name: string, mutation: MutationOptions<entities.UserSessionEntity>): Promise<void> {
     return await this.engine.mutateEntity<entities.UserSessionEntity>('login-server.dist.app/v1alpha1', 'UserSession', name, mutation);
   }
-  async deleteUserSession(name: string) {
+  async deleteUserSession(name: string): Promise<boolean> {
     return await this.engine.deleteEntity<entities.UserSessionEntity>('login-server.dist.app/v1alpha1', 'UserSession', name);
   }
 
-  async createPasskeyChallenge(entity: Pick<entities.PasskeyChallengeEntity, 'metadata' | 'spec'>) {
+  async createPasskeyChallenge(entity: Pick<entities.PasskeyChallengeEntity, 'metadata' | 'spec'>): Promise<EntityHandle<entities.PasskeyChallengeEntity>> {
     return await this.engine.insertEntity<entities.PasskeyChallengeEntity>({
       ...entity,
       apiVersion: 'login-server.dist.app/v1alpha1',
       kind: 'PasskeyChallenge',
     });
   }
-  async listPasskeyChallenges() {
+  async listPasskeyChallenges(): Promise<Array<entities.PasskeyChallengeEntity>> {
     return await this.engine.listEntities<entities.PasskeyChallengeEntity>('login-server.dist.app/v1alpha1', 'PasskeyChallenge');
   }
-  observePasskeyChallenges(signal: AbortSignal) {
+  observePasskeyChallenges(signal: AbortSignal): ReadableStream<StreamEvent<entities.PasskeyChallengeEntity>> {
     return this.engine.observeEntities<entities.PasskeyChallengeEntity>('login-server.dist.app/v1alpha1', 'PasskeyChallenge', { signal });
   }
-  async getPasskeyChallenge(name: string) {
+  async getPasskeyChallenge(name: string): Promise<entities.PasskeyChallengeEntity | null> {
     return await this.engine.getEntity<entities.PasskeyChallengeEntity>('login-server.dist.app/v1alpha1', 'PasskeyChallenge', name);
   }
-  async updatePasskeyChallenge(entity: Pick<entities.PasskeyChallengeEntity, 'metadata' | 'spec'>) {
+  async updatePasskeyChallenge(entity: Pick<entities.PasskeyChallengeEntity, 'metadata' | 'spec'>): Promise<void> {
     return await this.engine.updateEntity<entities.PasskeyChallengeEntity>({
       ...entity,
       apiVersion: 'login-server.dist.app/v1alpha1',
       kind: 'PasskeyChallenge',
     });
   }
-  async mutatePasskeyChallenge(name: string, mutation: MutationOptions<entities.PasskeyChallengeEntity>) {
+  async mutatePasskeyChallenge(name: string, mutation: MutationOptions<entities.PasskeyChallengeEntity>): Promise<void> {
     return await this.engine.mutateEntity<entities.PasskeyChallengeEntity>('login-server.dist.app/v1alpha1', 'PasskeyChallenge', name, mutation);
   }
-  async deletePasskeyChallenge(name: string) {
+  async deletePasskeyChallenge(name: string): Promise<boolean> {
     return await this.engine.deleteEntity<entities.PasskeyChallengeEntity>('login-server.dist.app/v1alpha1', 'PasskeyChallenge', name);
   }
 
-  async createPasskeyAssociation(entity: Pick<entities.PasskeyAssociationEntity, 'metadata' | 'spec' | 'status'>) {
+  async createPasskeyAssociation(entity: Pick<entities.PasskeyAssociationEntity, 'metadata' | 'spec' | 'status'>): Promise<EntityHandle<entities.PasskeyAssociationEntity>> {
     return await this.engine.insertEntity<entities.PasskeyAssociationEntity>({
       ...entity,
       apiVersion: 'login-server.dist.app/v1alpha1',
       kind: 'PasskeyAssociation',
     });
   }
-  async listPasskeyAssociations() {
+  async listPasskeyAssociations(): Promise<Array<entities.PasskeyAssociationEntity>> {
     return await this.engine.listEntities<entities.PasskeyAssociationEntity>('login-server.dist.app/v1alpha1', 'PasskeyAssociation');
   }
-  observePasskeyAssociations(signal: AbortSignal) {
+  observePasskeyAssociations(signal: AbortSignal): ReadableStream<StreamEvent<entities.PasskeyAssociationEntity>> {
     return this.engine.observeEntities<entities.PasskeyAssociationEntity>('login-server.dist.app/v1alpha1', 'PasskeyAssociation', { signal });
   }
-  async getPasskeyAssociation(name: string) {
+  async getPasskeyAssociation(name: string): Promise<entities.PasskeyAssociationEntity | null> {
     return await this.engine.getEntity<entities.PasskeyAssociationEntity>('login-server.dist.app/v1alpha1', 'PasskeyAssociation', name);
   }
-  async updatePasskeyAssociation(entity: Pick<entities.PasskeyAssociationEntity, 'metadata' | 'spec' | 'status'>) {
+  async updatePasskeyAssociation(entity: Pick<entities.PasskeyAssociationEntity, 'metadata' | 'spec' | 'status'>): Promise<void> {
     return await this.engine.updateEntity<entities.PasskeyAssociationEntity>({
       ...entity,
       apiVersion: 'login-server.dist.app/v1alpha1',
       kind: 'PasskeyAssociation',
     });
   }
-  async mutatePasskeyAssociation(name: string, mutation: MutationOptions<entities.PasskeyAssociationEntity>) {
+  async mutatePasskeyAssociation(name: string, mutation: MutationOptions<entities.PasskeyAssociationEntity>): Promise<void> {
     return await this.engine.mutateEntity<entities.PasskeyAssociationEntity>('login-server.dist.app/v1alpha1', 'PasskeyAssociation', name, mutation);
   }
-  async deletePasskeyAssociation(name: string) {
+  async deletePasskeyAssociation(name: string): Promise<boolean> {
     return await this.engine.deleteEntity<entities.PasskeyAssociationEntity>('login-server.dist.app/v1alpha1', 'PasskeyAssociation', name);
   }
 
-  async createOpenidConnectFlow(entity: Pick<entities.OpenidConnectFlowEntity, 'metadata' | 'spec'>) {
+  async createOpenidConnectFlow(entity: Pick<entities.OpenidConnectFlowEntity, 'metadata' | 'spec'>): Promise<EntityHandle<entities.OpenidConnectFlowEntity>> {
     return await this.engine.insertEntity<entities.OpenidConnectFlowEntity>({
       ...entity,
       apiVersion: 'login-server.dist.app/v1alpha1',
       kind: 'OpenidConnectFlow',
     });
   }
-  async listOpenidConnectFlows() {
+  async listOpenidConnectFlows(): Promise<Array<entities.OpenidConnectFlowEntity>> {
     return await this.engine.listEntities<entities.OpenidConnectFlowEntity>('login-server.dist.app/v1alpha1', 'OpenidConnectFlow');
   }
-  observeOpenidConnectFlows(signal: AbortSignal) {
+  observeOpenidConnectFlows(signal: AbortSignal): ReadableStream<StreamEvent<entities.OpenidConnectFlowEntity>> {
     return this.engine.observeEntities<entities.OpenidConnectFlowEntity>('login-server.dist.app/v1alpha1', 'OpenidConnectFlow', { signal });
   }
-  async getOpenidConnectFlow(name: string) {
+  async getOpenidConnectFlow(name: string): Promise<entities.OpenidConnectFlowEntity | null> {
     return await this.engine.getEntity<entities.OpenidConnectFlowEntity>('login-server.dist.app/v1alpha1', 'OpenidConnectFlow', name);
   }
-  async updateOpenidConnectFlow(entity: Pick<entities.OpenidConnectFlowEntity, 'metadata' | 'spec'>) {
+  async updateOpenidConnectFlow(entity: Pick<entities.OpenidConnectFlowEntity, 'metadata' | 'spec'>): Promise<void> {
     return await this.engine.updateEntity<entities.OpenidConnectFlowEntity>({
       ...entity,
       apiVersion: 'login-server.dist.app/v1alpha1',
       kind: 'OpenidConnectFlow',
     });
   }
-  async mutateOpenidConnectFlow(name: string, mutation: MutationOptions<entities.OpenidConnectFlowEntity>) {
+  async mutateOpenidConnectFlow(name: string, mutation: MutationOptions<entities.OpenidConnectFlowEntity>): Promise<void> {
     return await this.engine.mutateEntity<entities.OpenidConnectFlowEntity>('login-server.dist.app/v1alpha1', 'OpenidConnectFlow', name, mutation);
   }
-  async deleteOpenidConnectFlow(name: string) {
+  async deleteOpenidConnectFlow(name: string): Promise<boolean> {
     return await this.engine.deleteEntity<entities.OpenidConnectFlowEntity>('login-server.dist.app/v1alpha1', 'OpenidConnectFlow', name);
   }
 
-  async createOpenidConnectCode(entity: Pick<entities.OpenidConnectCodeEntity, 'metadata' | 'spec'>) {
+  async createOpenidConnectCode(entity: Pick<entities.OpenidConnectCodeEntity, 'metadata' | 'spec'>): Promise<EntityHandle<entities.OpenidConnectCodeEntity>> {
     return await this.engine.insertEntity<entities.OpenidConnectCodeEntity>({
       ...entity,
       apiVersion: 'login-server.dist.app/v1alpha1',
       kind: 'OpenidConnectCode',
     });
   }
-  async listOpenidConnectCodes() {
+  async listOpenidConnectCodes(): Promise<Array<entities.OpenidConnectCodeEntity>> {
     return await this.engine.listEntities<entities.OpenidConnectCodeEntity>('login-server.dist.app/v1alpha1', 'OpenidConnectCode');
   }
-  observeOpenidConnectCodes(signal: AbortSignal) {
+  observeOpenidConnectCodes(signal: AbortSignal): ReadableStream<StreamEvent<entities.OpenidConnectCodeEntity>> {
     return this.engine.observeEntities<entities.OpenidConnectCodeEntity>('login-server.dist.app/v1alpha1', 'OpenidConnectCode', { signal });
   }
-  async getOpenidConnectCode(name: string) {
+  async getOpenidConnectCode(name: string): Promise<entities.OpenidConnectCodeEntity | null> {
     return await this.engine.getEntity<entities.OpenidConnectCodeEntity>('login-server.dist.app/v1alpha1', 'OpenidConnectCode', name);
   }
-  async updateOpenidConnectCode(entity: Pick<entities.OpenidConnectCodeEntity, 'metadata' | 'spec'>) {
+  async updateOpenidConnectCode(entity: Pick<entities.OpenidConnectCodeEntity, 'metadata' | 'spec'>): Promise<void> {
     return await this.engine.updateEntity<entities.OpenidConnectCodeEntity>({
       ...entity,
       apiVersion: 'login-server.dist.app/v1alpha1',
       kind: 'OpenidConnectCode',
     });
   }
-  async mutateOpenidConnectCode(name: string, mutation: MutationOptions<entities.OpenidConnectCodeEntity>) {
+  async mutateOpenidConnectCode(name: string, mutation: MutationOptions<entities.OpenidConnectCodeEntity>): Promise<void> {
     return await this.engine.mutateEntity<entities.OpenidConnectCodeEntity>('login-server.dist.app/v1alpha1', 'OpenidConnectCode', name, mutation);
   }
-  async deleteOpenidConnectCode(name: string) {
+  async deleteOpenidConnectCode(name: string): Promise<boolean> {
     return await this.engine.deleteEntity<entities.OpenidConnectCodeEntity>('login-server.dist.app/v1alpha1', 'OpenidConnectCode', name);
   }
 
-  async createIssuedToken(entity: Pick<entities.IssuedTokenEntity, 'metadata' | 'spec'>) {
+  async createIssuedToken(entity: Pick<entities.IssuedTokenEntity, 'metadata' | 'spec'>): Promise<EntityHandle<entities.IssuedTokenEntity>> {
     return await this.engine.insertEntity<entities.IssuedTokenEntity>({
       ...entity,
       apiVersion: 'login-server.dist.app/v1alpha1',
       kind: 'IssuedToken',
     });
   }
-  async listIssuedTokens() {
+  async listIssuedTokens(): Promise<Array<entities.IssuedTokenEntity>> {
     return await this.engine.listEntities<entities.IssuedTokenEntity>('login-server.dist.app/v1alpha1', 'IssuedToken');
   }
-  observeIssuedTokens(signal: AbortSignal) {
+  observeIssuedTokens(signal: AbortSignal): ReadableStream<StreamEvent<entities.IssuedTokenEntity>> {
     return this.engine.observeEntities<entities.IssuedTokenEntity>('login-server.dist.app/v1alpha1', 'IssuedToken', { signal });
   }
-  async getIssuedToken(name: string) {
+  async getIssuedToken(name: string): Promise<entities.IssuedTokenEntity | null> {
     return await this.engine.getEntity<entities.IssuedTokenEntity>('login-server.dist.app/v1alpha1', 'IssuedToken', name);
   }
-  async updateIssuedToken(entity: Pick<entities.IssuedTokenEntity, 'metadata' | 'spec'>) {
+  async updateIssuedToken(entity: Pick<entities.IssuedTokenEntity, 'metadata' | 'spec'>): Promise<void> {
     return await this.engine.updateEntity<entities.IssuedTokenEntity>({
       ...entity,
       apiVersion: 'login-server.dist.app/v1alpha1',
       kind: 'IssuedToken',
     });
   }
-  async mutateIssuedToken(name: string, mutation: MutationOptions<entities.IssuedTokenEntity>) {
+  async mutateIssuedToken(name: string, mutation: MutationOptions<entities.IssuedTokenEntity>): Promise<void> {
     return await this.engine.mutateEntity<entities.IssuedTokenEntity>('login-server.dist.app/v1alpha1', 'IssuedToken', name, mutation);
   }
-  async deleteIssuedToken(name: string) {
+  async deleteIssuedToken(name: string): Promise<boolean> {
     return await this.engine.deleteEntity<entities.IssuedTokenEntity>('login-server.dist.app/v1alpha1', 'IssuedToken', name);
   }
 

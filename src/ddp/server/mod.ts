@@ -1,5 +1,5 @@
-import { default as EJSON } from "https://esm.sh/ejson@2.2.3";
-import { ROOT_CONTEXT, SpanKind, TextMapGetter, propagation, trace } from "https://deno.land/x/observability@v0.6.1/opentelemetry/api.js";
+import { EJSON } from "jsr:@cloudydeno/ejson@0.1.1";
+import { ROOT_CONTEXT, SpanKind, TextMapGetter, propagation, trace } from "jsr:@cloudydeno/opentelemetry@0.10.0/pkg/api";
 
 import { ClientSentPacket, DocumentFields, MeteorError, OutboundSubscription, ServerSentPacket } from "../types.ts";
 import { RandomStream } from "../random.ts";

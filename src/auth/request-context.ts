@@ -1,5 +1,5 @@
-import { Cookie, deleteCookie, getCookies, setCookie } from "https://deno.land/std@0.208.0/http/cookie.ts";
-import { AuthRequestContext } from "./types.ts";
+import { type Cookie, deleteCookie, getCookies, setCookie } from "jsr:@std/http@1.0.14/cookie";
+import { type AuthRequestContext } from "./types.ts";
 
 export class AuthRequestContextImpl implements AuthRequestContext {
   constructor(
