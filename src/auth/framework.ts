@@ -1,13 +1,13 @@
-import { LoginServerApi, UserEntity } from "../../apis/login-server/definitions.ts";
-import { EntityEngine } from "../engine/engine.ts";
-import { EntityStorage } from "../engine/types.ts";
+import { LoginServerApi, type UserEntity } from "./api/definitions.ts";
+import { EntityEngineImpl } from "../engine/engine.ts";
+import type { EntityEngine, EntityStorage } from "../engine/types.ts";
 import { authStyle } from "./default-ui/auth-style.ts";
 import { renderLoginPage } from "./default-ui/login-page.tsx";
 import { listUiRpcs } from "./default-ui/rpc.ts";
 import { renderSettingsPage } from "./default-ui/settings-page.tsx";
 import { ProfileTab } from "./default-ui/tabs/profile.tsx";
 import { AuthRequestContextImpl } from "./request-context.ts";
-import { AuthRequestContext, AuthRequestHandler, AuthRpcHandler, AuthSystem, AuthnMethod, RoleGrant, SettingsTab } from "./types.ts";
+import type { AuthRequestContext, AuthRequestHandler, AuthRpcHandler, AuthSystem, AuthnMethod, RoleGrant, SettingsTab } from "./types.ts";
 
 
 export class AuthFramework implements AuthSystem {
@@ -24,19 +24,19 @@ export class AuthFramework implements AuthSystem {
     }
     // TODO: get paths from the UI module
   }
-  /*private*/ readonly index = new EntityEngine;
-  private readonly rpcs = new Map<string,AuthRpcHandler>();
-  private readonly paths = new Map<string,AuthRequestHandler>();
-  private readonly roleGrants = new Array<RoleGrant>;
+  /*private*/ readonly index: EntityEngine = new EntityEngineImpl;
+  private readonly rpcs: Map<string, AuthRpcHandler> = new Map;
+  private readonly paths: Map<string, AuthRequestHandler> = new Map;
+  private readonly roleGrants: Array<RoleGrant> = [];
 
-  async maintainDb() {
+  async maintainDb(): Promise<void> {
     for (const authnMethod of this.authnMethods.values()) {
       await authnMethod.runMaintanence?.(this);
     }
   }
 
-  private readonly authnMethods = new Map<string,AuthnMethod>();
-  public addAuthnMethod(impl: AuthnMethod) {
+  private readonly authnMethods: Map<string, AuthnMethod> = new Map;
+  public addAuthnMethod(impl: AuthnMethod): void {
     if (this.authnMethods.has(impl.methodId)) {
       throw new Error(`Authn method ${impl.methodId} is already set up once`);
     }
@@ -48,7 +48,7 @@ export class AuthFramework implements AuthSystem {
       this.paths.set(id, handler);
     }
   }
-  public hasAuthnMethod(methodId: string) {
+  public hasAuthnMethod(methodId: string): boolean {
     return this.authnMethods.has(methodId);
   }
 
@@ -105,7 +105,7 @@ export class AuthFramework implements AuthSystem {
     // return context.respondText(302, 'Login complete, redirecting back.');
   }
 
-  redirectToLogin(_req: Request, origUrl: URL, _connInfo: Deno.ServeHandlerInfo) {
+  redirectToLogin(_req: Request, origUrl: URL, _connInfo: Deno.ServeHandlerInfo): Promise<Response> {
     const newUrl = new URL('auth/login', this.selfBaseUrl);
     // url.protocol = 'https:'; // TODO: remove
     newUrl.searchParams.set('redirect', `${origUrl.pathname}${origUrl.search}`);
@@ -118,7 +118,7 @@ export class AuthFramework implements AuthSystem {
     }));
   }
 
-  async fetchRequestSession(req: Request, connInfo: Deno.ServeHandlerInfo) {
+  async fetchRequestSession(req: Request, connInfo: Deno.ServeHandlerInfo): Promise<UserEntity | null> {
     // TODO: add support for taking JWTs off the `Authorization` header
 
     const ctx = new AuthRequestContextImpl(req, connInfo);

@@ -1,7 +1,4 @@
-import type { EntityEngine } from "../engine.ts";
-import type { ApiKindEntity } from "../types.ts";
-import type { OpenAPI2SchemaObject } from "./openapi.ts";
-
+import type { StreamEvent, EntityHandle, EntityEngine, EntityApiDefinition, EntityKindEntity } from "../types.ts";
 
 export const EntityKindEntityKind: EntityKindEntity = {
   apiVersion: 'schema.dist.app/v1alpha1',
@@ -76,51 +73,10 @@ export const EntityKindEntityKind: EntityKindEntity = {
   },
 };
 
-
-export interface EntityKindEntity extends ApiKindEntity {
-  apiVersion: "schema.dist.app/v1alpha1";
-  kind: "EntityKind";
-  spec: {
-    group: string;
-    names: {
-      plural: string;
-      singular: string;
-      kind: string;
-      shortNames?: Array<string>;
-    };
-    versions: Array<{
-      name: string;
-      served: boolean;
-      storage: boolean;
-      subresources?: {
-        status?: boolean;
-      };
-      schema?: {
-        openAPIV3Schema?: OpenAPI2SchemaObject;
-        // {
-        //   type: 'object';
-        //   properties: {}; // TODO: OpenAPI Schema types
-        // };
-      };
-    }>,
-  };
-}
-
-
-// TODO: solidfiy what we need to know about entities
-// also where should this live?
-export interface EntityApiDefinition<T extends ApiKindEntity = ApiKindEntity> {
-  name: string;
-  kinds: Record<string, EntityKindEntity>;
-  // types?: Record<string, T>;
-}
-
-
+// TODO: generate from the declared interface somehow
 /** Experimentation with what generated code could look like */
 export class SchemaApi {
-  static readonly definition: EntityApiDefinition<
-    | EntityKindEntity
-  > = {
+  static readonly definition: EntityApiDefinition = {
     name: 'schema.dist.app/v1alpha1',
     kinds: {
       'EntityKind': EntityKindEntityKind,
@@ -132,30 +88,30 @@ export class SchemaApi {
   ) {}
 
   // Methods for kind: EntityKind
-  async insertEntityKind(entity: Pick<EntityKindEntity, 'metadata' | 'spec'>) {
+  async insertEntityKind(entity: Pick<EntityKindEntity, 'metadata' | 'spec'>): Promise<EntityHandle<EntityKindEntity>> {
     return await this.engine.insertEntity<EntityKindEntity>({
       ...entity,
       apiVersion: 'schema.dist.app/v1alpha1',
       kind: 'EntityKind',
     });
   }
-  async listEntityKinds() {
+  async listEntityKinds(): Promise<Array<EntityKindEntity>> {
     return await this.engine.listEntities<EntityKindEntity>('schema.dist.app/v1alpha1', 'EntityKind');
   }
-  observeEntityKinds(signal: AbortSignal) {
+  observeEntityKinds(signal: AbortSignal): ReadableStream<StreamEvent<EntityKindEntity>> {
     return this.engine.observeEntities<EntityKindEntity>('schema.dist.app/v1alpha1', 'EntityKind', { signal });
   }
-  async getEntityKind(name: string) {
+  async getEntityKind(name: string): Promise<EntityKindEntity | null> {
     return await this.engine.getEntity<EntityKindEntity>('schema.dist.app/v1alpha1', 'EntityKind', name);
   }
-  async updateEntityKind(entity: Pick<EntityKindEntity, 'metadata' | 'spec'>) {
+  async updateEntityKind(entity: Pick<EntityKindEntity, 'metadata' | 'spec'>): Promise<void>  {
     return await this.engine.updateEntity<EntityKindEntity>({
       ...entity,
       apiVersion: 'schema.dist.app/v1alpha1',
       kind: 'EntityKind',
     });
   }
-  async deleteEntityKind(name: string) {
+  async deleteEntityKind(name: string): Promise<boolean> {
     return await this.engine.deleteEntity<EntityKindEntity>('schema.dist.app/v1alpha1', 'EntityKind', name);
   }
 

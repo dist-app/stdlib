@@ -19,18 +19,18 @@ const subtracer = trace.getTracer('ddp.subscription');
 const serverId = crypto.randomUUID().split('-')[0];
 
 export class DdpInterface {
-  private readonly methods = new Map<string, MethodHandler>();
-  private readonly publications = new Map<string, PublicationHandler>();
-  private readonly openSockets = new Set<DdpSocket>();
+  private readonly methods: Map<string, MethodHandler> = new Map;
+  private readonly publications: Map<string, PublicationHandler> = new Map;
+  private readonly openSockets: Set<DdpSocket> = new Set;
 
-  addMethod(name: string, handler: MethodHandler) {
+  addMethod(name: string, handler: MethodHandler): void {
     this.methods.set(name, handler);
   }
-  addPublication(name: string, handler: PublicationHandler) {
+  addPublication(name: string, handler: PublicationHandler): void {
     this.publications.set(name, handler);
   }
 
-  registerSocket(socket: DdpSocket) {
+  registerSocket(socket: DdpSocket): void {
     this.openSockets.add(socket);
     socket.closePromise
       .catch(err => {
@@ -41,7 +41,7 @@ export class DdpInterface {
       });
   }
 
-  async callMethod(socket: DdpSocket, name: string, params: unknown[], random: RandomStream | null) {
+  async callMethod(socket: DdpSocket, name: string, params: unknown[], random: RandomStream | null): Promise<unknown> {
     const handler = this.methods.get(name);
     if (!handler) {
       throw new Error(`unimplemented method: "${name}"`);
@@ -49,7 +49,7 @@ export class DdpInterface {
     return await handler(socket, params, random);
   }
 
-  async callSubscribe(sub: DdpSocketSubscription, name: string, params: unknown[]) {
+  async callSubscribe(sub: DdpSocketSubscription, name: string, params: unknown[]): Promise<void> {
     const handler = this.publications.get(name);
     if (!handler) {
       throw new Error(`unimplemented sub: "${name}"`);
@@ -69,7 +69,7 @@ export class DdpSocketSubscription implements OutboundSubscription {
     public readonly connection: DdpSocket,
     private readonly subId: string,
   ) {}
-  public readonly stopCtlr = new AbortController();
+  public readonly stopCtlr: AbortController = new AbortController();
 
   public stop(error?: MeteorError) {
     if (!this.connection.subscriptions.delete(this.subId)) return;
@@ -90,7 +90,7 @@ export class DdpSocketSubscription implements OutboundSubscription {
     return this.stopCtlr.signal;
   }
 
-  get userId() {
+  get userId(): string | null {
     return null; // TODO
     // return this.connection.userId;
   }
@@ -128,8 +128,8 @@ export class DdpSocketSubscription implements OutboundSubscription {
 // This would depend on WebSocketStream to properly function though.
 export class DdpSocket {
 
-  public readonly collections = new Map<string,PresentedCollection>();
-  public getCollection(collection: string) {
+  public readonly collections: Map<string, PresentedCollection> = new Map;
+  public getCollection(collection: string): PresentedCollection {
     let match = this.collections.get(collection);
     if (!match) {
       match = new PresentedCollection(this, collection);
@@ -195,7 +195,7 @@ export class DdpSocket {
   private readonly closeCtlr = new AbortController();
   public readonly closeSignal = this.closeCtlr.signal;
 
-  public readonly subscriptions = new Map<string, DdpSocketSubscription>();
+  public readonly subscriptions: Map<string, DdpSocketSubscription> = new Map;
 
   async handleClientPacket(pkt: TracedClientSentPacket) {
     const ctx = propagation.extract(ROOT_CONTEXT, pkt.baggage ?? {}, BaggageGetter);

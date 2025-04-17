@@ -1,4 +1,4 @@
-import type { EntityEngine } from "./engine.ts";
+import type { EntityEngine } from "./types.ts";
 
 /** Mirrors the Kubernetes REST API, backed by the given engine  */
 export async function serveRestApis(

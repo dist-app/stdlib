@@ -14,6 +14,15 @@ export type ListSecretsQuery = {
   include_imports?: boolean; // Weather to include imported secrets or not.
   tagSlugs?: string; // The comma separated tag slugs to filter secrets.
 };
+export type ListSecretsResponse = {
+  "secrets": Array<SecretDetails>;
+  "imports": Array<{
+    "secretPath": string;
+    "environment": string;
+    "folderId": string;
+    "secrets": Array<SecretDetails>;
+  }>;
+};
 
 export async function listSecrets(
   client: InfisicalApiClient,
@@ -21,15 +30,7 @@ export async function listSecrets(
 ) {
   return await client.fetchJsonApi('v3/secrets/raw', {
     query: new URLSearchParams(query as any), // fuck it, type system
-  }) as {
-    "secrets": Array<SecretDetails>;
-    "imports": Array<{
-      "secretPath": string;
-      "environment": string;
-      "folderId": string;
-      "secrets": Array<SecretDetails>;
-    }>;
-  };
+  }) as ListSecretsResponse;
 }
 
 export type SecretDetails = {

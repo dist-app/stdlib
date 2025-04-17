@@ -11,38 +11,38 @@ export class AuthRequestContextImpl implements AuthRequestContext {
   }
   requestUrl: URL;
   cookies: Record<string,string>;
-  respHeaders = new Headers;
+  respHeaders: Headers = new Headers;
 
-  setCookie(cookie: Cookie) {
+  setCookie(cookie: Cookie): void {
     setCookie(this.respHeaders, cookie);
   }
 
   deleteCookie(name: string, attributes: {
     path?: string;
     domain?: string;
-  }) {
+  }): void {
     deleteCookie(this.respHeaders, name, attributes);
   }
 
-  setHeader(name: string, value: string) {
+  setHeader(name: string, value: string): void {
     this.respHeaders.set(name, value);
   }
 
-  respondText(status: number, body: string) {
+  respondText(status: number, body: string): Response {
     return new Response(body, {
       status: status,
       headers: this.respHeaders,
     });
   }
 
-  async readFormFields() {
+  async readFormFields(): Promise<URLSearchParams> {
     if (this.request.headers.get('content-type') != 'application/x-www-form-urlencoded') {
       throw new Error(`unsupported form content-type`);
     }
     return new URLSearchParams(await this.request.text());
   }
 
-  get remoteAddress() {
+  get remoteAddress(): string {
     const addr = getRemoteAddress(this.connInfo);
     return addr.hostname;
   }

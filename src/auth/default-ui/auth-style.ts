@@ -1,4 +1,4 @@
-export const authStyle = `
+export const authStyle: string = `
 html, body {
   height: 100%;
   margin: 0;

@@ -1,5 +1,5 @@
 import type { OpenAPI2SchemaObject } from "./openapi.ts";
-import * as base64 from "https://deno.land/std@0.208.0/encoding/base64.ts";
+import { encodeBase64, decodeBase64 } from "jsr:@std/encoding@1.0.9";
 
 export interface ConversionOpts {
   nativeBinary: boolean;
@@ -29,7 +29,7 @@ export function fromStorage(data: unknown, schema: OpenAPI2SchemaObject, opts: C
       if (typeof data == 'number') return data % 0;
       return null;
     case 'binary':
-      if (typeof data == 'string') return base64.decodeBase64(data);
+      if (typeof data == 'string') return decodeBase64(data);
       if (data?.constructor == Uint8Array) return data;
       return null;
     case 'dateTime':
@@ -83,7 +83,7 @@ export function toStorage(data: unknown, schema: OpenAPI2SchemaObject, opts: Con
     case 'binary':
       if (!(data instanceof Uint8Array)) throw new Error(`expected Uint8Array got ${data?.constructor?.name}`);
       if (opts.nativeBinary) return data;
-      return base64.encodeBase64(data);
+      return encodeBase64(data);
     case 'array': {
       if (!Array.isArray(data)) throw new Error(`expected Array got ${typeof data}`);
       const childSchema = schema.items;

@@ -1,10 +1,11 @@
 #!/usr/bin/env -S deno run --allow-env --allow-net=api.deno.com --allow-run=deno,kubectl --allow-read=. --no-prompt
 
-import * as base64 from "https://deno.land/std@0.208.0/encoding/base64.ts";
+import { decodeBase64 } from "jsr:@std/encoding@1.0.9";
 
-import { type RestClient } from "https://deno.land/x/kubernetes_client@v0.5.0/mod.ts";
-import { CoreV1Api } from "https://deno.land/x/kubernetes_apis@v0.4.0/builtin/core@v1/mod.ts";
-import { ExternaldnsV1alpha1Api } from "https://deno.land/x/kubernetes_apis@v0.4.0/external-dns/externaldns.k8s.io@v1alpha1/mod.ts";
+import { type RestClient } from "jsr:@cloudydeno/kubernetes-client@0.7.3";
+import { CoreV1Api } from "jsr:@cloudydeno/kubernetes-apis@0.5.2/core/v1";
+import { ExternaldnsV1alpha1Api } from "jsr:@cloudydeno/kubernetes-apis@0.5.2/externaldns.k8s.io/v1alpha1";
+
 import { DomainRecord, SubhostingApiClient } from "./client.ts";
 
 interface CertificateEntry {
@@ -27,8 +28,8 @@ export class CertificateIndex {
       .filter(x => x.type == 'kubernetes.io/tls')
       .map<CertificateEntry>(x => ({
         altNames: x.metadata?.annotations?.['cert-manager.io/alt-names']?.split(',') ?? [],
-        cert: new TextDecoder().decode(base64.decodeBase64(x.data?.['tls.crt'] ?? '')),
-        key: new TextDecoder().decode(base64.decodeBase64(x.data?.['tls.key'] ?? '')),
+        cert: new TextDecoder().decode(decodeBase64(x.data?.['tls.crt'] ?? '')),
+        key: new TextDecoder().decode(decodeBase64(x.data?.['tls.key'] ?? '')),
       }))
       .filter(x => x.altNames?.[0] && x.cert && x.key);
     return new this(tlsEntries);

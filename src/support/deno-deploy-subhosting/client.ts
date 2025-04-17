@@ -1,4 +1,4 @@
-import { TextLineStream } from "https://deno.land/std@0.224.0/streams/mod.ts";
+import { TextLineStream } from "jsr:@std/streams@1.0.9/text-line-stream";
 
 export class SubhostingApiClient {
   constructor(private readonly props: {
@@ -10,7 +10,7 @@ export class SubhostingApiClient {
   async fetchApiResponse({path, ...opts}: RequestInit & {
     path: string;
     // query?: URLSearchParams;
-  }) {
+  }): Promise<Response> {
     const url = new URL(path, this.props.serverUrl ?? 'https://api.deno.com/');
     const headers = new Headers(opts.headers);
     headers.set('authorization', 'Bearer '+await this.props.tokenFactory());
@@ -23,7 +23,7 @@ export class SubhostingApiClient {
     bodyJson?: unknown;
     path: string;
     query?: URLSearchParams;
-  }) {
+  }): Promise<T> {
     const headers = new Headers(opts.headers);
     headers.set('accept', 'application/json');
     if (bodyJson) {
@@ -38,16 +38,16 @@ export class SubhostingApiClient {
   async createProject(spec: {
     name: string | null;
     description: string;
-  }): Promise<DenoDeployProject> {
-    return await this.fetchJsonApi<DenoDeployProject>({
+  }): Promise<ProjectRecord> {
+    return await this.fetchJsonApi<ProjectRecord>({
       path: `v1/organizations/${this.props.organizationId}/projects`,
       method: "POST",
       bodyJson: spec,
     });
   }
 
-  async listProjects(): Promise<Array<DenoDeployProject>> {
-    return await this.fetchJsonApi<Array<DenoDeployProject>>({
+  async listProjects(): Promise<Array<ProjectRecord>> {
+    return await this.fetchJsonApi<Array<ProjectRecord>>({
       path: `/v1/organizations/${this.props.organizationId}/projects`,
       method: "GET",
       headers: {
@@ -211,7 +211,7 @@ export class SubhostingApiClient {
 
 }
 
-export interface DenoDeployProject {
+export interface ProjectRecord {
   id: string;
   name: string;
   description: string;

@@ -1,83 +1,27 @@
 
-import { EntityApiDefinition, SchemaApi, type EntityKindEntity } from "./schema/api-definition.ts";
-import type { ApiKindEntity, EntityStorage, StreamEvent } from "./types.ts";
+import { SchemaApi } from "./schema/api-definition.ts";
+import {
+  type EntityHandle,
+  type MutationOptions,
+  type ApiKindEntity,
+  type EntityStorage,
+  type StreamEvent,
+  type EntityApiDefinition,
+  type EntityEngine,
+  EntityKindEntity,
+} from "./types.ts";
 
-// import { EntityStorage, LayeredNamespace, NamespaceSpecWithImpl } from "../storage.ts";
-
-export type MutationOptions<T extends ApiKindEntity> =
-  | ((x: T) => void | symbol)
-  | {
-    mutationCb: (x: T) => void | symbol;
-    creationCb: () => T;
-  };
-
-// interface EntityStorage {
-//   // TODO: add some sort of API for 'submissions' (either entity spec/status or fetch request/response)
-//   insertEntity<T extends ApiKindEntity>(entity: T): Promise<void>;
-//   listAllEntities(): Promise<ApiKindEntity[]>;
-//   listEntities<T extends ApiKindEntity>(apiVersion: T["apiVersion"], kind: T["kind"]): Promise<T[]>;
-//   // watchEntities<T extends ApiKindEntity>(apiVersion: T["apiVersion"], kind: T["kind"]);
-//   getEntity<T extends ApiKindEntity>(apiVersion: T["apiVersion"], kind: T["kind"], name: string): Promise<T | null>;
-//   updateEntity<T extends ApiKindEntity>(newEntity: T): Promise<void>;
-//   deleteEntity<T extends ApiKindEntity>(apiVersion: T["apiVersion"], kind: T["kind"], name: string): Promise<boolean>;
-// }
-
-
-// class KvEntityLayer
-
-// type ApiFilter<T extends ApiKindEntity> = {
-//   apiVersion: T["apiVersion"];
-//   kind: T["kind"];
-//   namespace?: string;
-//   op: 'Read' | 'Write';
-// };
-
-// const tracer = new LogicTracer({
-//   name: 'dist.app/entity-engine',
-//   requireParent: true,
-// });
-
-// function loadFunc(this: EntityEngine, input: ApiKindEntity, key: string) {
-//   if (input.apiVersion == 'runtime.dist.app/v1alpha1') {
-//     // if (input.kind == 'ForeignNamespace') {
-//     //   // return new
-//     // }
-//     if (input.kind == 'Workspace') {
-//       return new ShellSession(this, input.metadata.namespace ?? 'bug', input.metadata.name);
-//     }
-//     if (input.kind == 'Activity') {
-//       throw new Error(`TODO: activity class`)
-//     }
-//   }
-//   throw new Error('TODO: loadFunc for '+key);
-// }
-
-export class EntityEngine {
+export class EntityEngineImpl implements EntityEngine {
   constructor(
     // primaryCatalog
   ) {
     this.addApi('schema.dist.app', new SchemaReflectionApiStorage(this), SchemaApi.definition);
   }
 
-  apiImpls = new Map<string, {
+  apiImpls: Map<string, {
     storage: EntityStorage;
     definition: EntityApiDefinition;
-  }>();
-  // loadedMap = new Map<string, ShellSession>();
-  // loader = new AsyncKeyedCache<ApiKindEntity, string, | ShellSession>({
-  //   keyFunc: x => [x.metadata.namespace, x.apiVersion, x.kind, x.metadata.name].join('_'),
-  //   loadFunc: async (input, key) => {
-  //     if (input.apiVersion == 'runtime.dist.app/v1alpha1') {
-  //       if (input.kind == 'ForeignNamespace') {
-  //         // return new
-  //       }
-  //       if (input.kind == 'Workspace') {
-  //         return new ShellSession(this, input.metadata.namespace ?? 'bug', input.metadata.name);
-  //       }
-  //     }
-  //     throw new Error('TODO: loadFunc for '+key);
-  //   },
-  // })
+  }> = new Map;
 
   addApi(apiName: string, storage: EntityStorage, definition: EntityApiDefinition) {
     if (this.apiImpls.has(apiName)) {
@@ -92,7 +36,7 @@ export class EntityEngine {
     });
   }
 
-  selectNamespaceLayer<T extends ApiKindEntity>(props: {
+  private selectNamespaceLayer<T extends ApiKindEntity>(props: {
     apiVersion: T["apiVersion"];
   }) {
     const apiName = props.apiVersion.split('/')[0];
@@ -103,12 +47,13 @@ export class EntityEngine {
     return ns;
   }
 
-  async insertEntity<T extends ApiKindEntity>(entity: T) {
+  async insertEntity<T extends ApiKindEntity>(entity: T): Promise<EntityHandle<T>> {
     const layer = this.selectNamespaceLayer({
       apiVersion: entity.apiVersion,
     });
     const definition = layer.definition.kinds[entity.kind];
     if (!definition) console.error(`WARN: lacking definitions for ${entity.apiVersion} ${entity.kind}`);
+    // TODO: get resulting entity and return an EntitySnapshot
     await layer?.storage.insertEntity<T>(definition, entity);
     return this.getEntityHandle<T>(
       entity.apiVersion, entity.kind,
@@ -190,14 +135,14 @@ export class EntityEngine {
     apiVersion: T["apiVersion"],
     apiKind: T["kind"],
     name: string
-  ) {
-    return new EntityHandle<T>(this, {
+  ): EntityHandle<T> {
+    return new EngineEntityHandle<T>(this, {
       apiVersion, apiKind,
       name,
     });
   }
 
-  async updateEntity<T extends ApiKindEntity>(newEntity: T) {
+  async updateEntity<T extends ApiKindEntity>(newEntity: T): Promise<void> {
     // return tracer.asyncSpan('engine updateEntity', {
     //   attributes: {
     //     'distapp.entity.api_version': newEntity.apiVersion,
@@ -224,7 +169,7 @@ export class EntityEngine {
     kind: T["kind"],
     name: string,
     mutation: MutationOptions<T>,
-  ) {
+  ): Promise<void> {
     const mutationCb = typeof mutation == 'function' ? mutation : mutation.mutationCb;
     const creationCb = typeof mutation == 'function' ? null : mutation.creationCb;
     // return tracer.asyncSpan('engine mutateEntity', {
@@ -274,7 +219,7 @@ export class EntityEngine {
           //     continue;
           //   }
           // } else {
-            throw new Error(`Mutation failed: ${(err as Error).message}`);
+            throw new Error(`TODO: Mutation failed: ${(err as Error).message}`);
           // }
         }
 
@@ -288,73 +233,11 @@ export class EntityEngine {
     // });
   }
 
-  // // Mutation helper
-  // async upsertEntity<T extends ApiKindEntity>(
-  //   apiVersion: T["apiVersion"],
-  //   kind: T["kind"],
-  //   name: string,
-  //   upsertCb: (x: T | null) => T | symbol
-  // ) {
-  //   // return tracer.asyncSpan('engine mutateEntity', {
-  //   //   attributes: {
-  //   //     'distapp.entity.api_version': apiVersion,
-  //   //     'distapp.entity.kind': kind,
-  //   //     'distapp.entity.namespace': namespace,
-  //   //     'distapp.entity.name': name,
-  //   //   },
-  //   // }, async span => {
-  //     const layer = this.selectNamespaceLayer({
-  //       apiVersion,
-  //     });
-
-  //     for (let i = 0; i <= 3; i++) {
-  //       if (i > 0) {
-  //         console.warn(`Retrying mutation on ${kind}/${name} (#${i})`);
-  //       }
-
-  //       let entity = await layer.getEntity(apiVersion, kind, name);
-
-  //       const result = upsertCb(entity);
-  //       if (result == Symbol.for('no-op'))
-  //         return;
-
-  //       // TODO: retry this if we raced someone else
-  //       try {
-  //         if (entity) {
-  //           await layer.updateEntity(res);
-  //         } else {
-  //           await layer.insertEntity(entity);
-  //         }
-  //         return;
-  //       } catch (err) {
-  //         // TODO: hook back up when ddp client has proper errors
-  //         console.log('catching mutate err', JSON.stringify(err), err);
-  //         // if (err instanceof Meteor.Error && err.error == 'no-update') {
-  //         //   const richDetailsTODO = err.details as undefined | string | {latestVersion: T};
-  //         //   if (richDetailsTODO && typeof richDetailsTODO !== 'string' && richDetailsTODO.latestVersion) {
-  //         //     entity = richDetailsTODO.latestVersion;
-  //         //     continue;
-  //         //   }
-  //         // } else {
-  //           throw new Error(`Mutation failed: ${err.message}`);
-  //         // }
-  //       }
-
-  //       entity = await layer.getEntity(apiVersion, kind, name);
-  //       if (!entity)
-  //         throw new Error(`Entity doesn't exist (anymore)`);
-  //       continue;
-  //     }
-  //     throw new Error(`Ran out of retries for mutation. [no-mutate]`);
-  //     // throw new Meteor.Error('no-mutate', `Ran out of retries for mutation.`);
-  //   // });
-  // }
-
   async deleteEntity<T extends ApiKindEntity>(
     apiVersion: T["apiVersion"],
     kind: T["kind"],
     name: string
-  ) {
+  ): Promise<boolean> {
     // return tracer.asyncSpan('engine deleteEntity', {
     //   attributes: {
     //     'distapp.entity.api_version': apiVersion,
@@ -371,67 +254,10 @@ export class EntityEngine {
       return await layer.storage.deleteEntity(definition, apiVersion, kind, name);
     // });
   }
-
-
-
-  // useRemoteNamespace(appUri: string) {
-  //   // const [loadedNs, setLoadedNs] = useState<string|false>(false);
-
-  //   const appUrl = new URL(appUri);
-
-  //   if (appUrl.protocol == 'bundled:') {
-
-  //     // TODO: the fixed namespace sucks!
-  //     const bundledName = decodeURIComponent(appUrl.pathname);
-  //     if (this.namespaces.has(bundledName)) return bundledName;
-
-  //     this.addNamespace({
-  //       name: bundledName,
-  //       spec: {
-  //         layers: [{
-  //           mode: 'ReadOnly',
-  //           accept: [{
-  //             apiGroup: 'manifest.dist.app',
-  //           }],
-  //           storage: {
-  //             type: 'bundled',
-  //             bundleId: bundledName,
-  //           },
-  //         }],
-  //       }});
-  //     return bundledName;
-  //   }
-  //   // console.log('p', appUrl.protocol)
-
-  //   throw new Error("Function not implemented.");
-  // }
-
-
-  // async findAllEntities<T extends ApiKindEntity>(
-  //   apiVersion: T["apiVersion"],
-  //   kind: T["kind"],
-  // ) {
-  //   // Find places where we can find the type of entity
-  //   const namespaces = Array
-  //     .from(this
-  //       .getNamespacesServingApi({
-  //         apiVersion, kind,
-  //         op: 'Read',
-  //       })
-  //       .keys());
-
-  //   // Collect all of the entities
-  //   return await Promise.all(namespaces
-  //     .flatMap(x => this
-  //       .listEntities<T>(apiVersion, kind, x)
-  //       .then(list => list
-  //         .map(entity => ({ ns: x, entity })))));
-  // }
-
 }
 
 
-export class EntityHandle<Tself extends ApiKindEntity> {
+export class EngineEntityHandle<Tself extends ApiKindEntity> implements EntityHandle<Tself> {
   constructor(
     private readonly engine: EntityEngine,
     public readonly coords: {
@@ -454,7 +280,7 @@ export class EntityHandle<Tself extends ApiKindEntity> {
       name);
   }
 
-  async get() {
+  async get(): Promise<Tself | null> {
     return await this.engine.getEntity<Tself>(
       this.coords.apiVersion, this.coords.apiKind,
       this.coords.name);
@@ -462,7 +288,7 @@ export class EntityHandle<Tself extends ApiKindEntity> {
 
   async insert(
     entity: Omit<Tself, 'apiVersion' | 'kind'> & {metadata?: {name?: undefined}},
-  ) {
+  ): Promise<void> {
     await this.engine.insertEntity<Tself>({
       ...entity,
       apiVersion: this.coords.apiVersion,
@@ -476,7 +302,7 @@ export class EntityHandle<Tself extends ApiKindEntity> {
 
   async insertNeighbor<Tother extends ApiKindEntity>(
     neighbor: Tother,
-  ) {
+  ): Promise<EntityHandle<Tother> | null>  {
     await this.engine.insertEntity<Tother>({
       ...neighbor,
     });
@@ -486,14 +312,14 @@ export class EntityHandle<Tself extends ApiKindEntity> {
       neighbor.metadata.name);
   }
 
-  async mutate(mutationCb: MutationOptions<Tself>) {
+  async mutate(mutationCb: MutationOptions<Tself>): Promise<void> {
     return await this.engine.mutateEntity<Tself>(
       this.coords.apiVersion, this.coords.apiKind,
       this.coords.name,
       mutationCb);
   }
 
-  async delete() {
+  async delete(): Promise<boolean> {
     return await this.engine.deleteEntity<Tself>(
       this.coords.apiVersion, this.coords.apiKind,
       this.coords.name);
@@ -502,7 +328,7 @@ export class EntityHandle<Tself extends ApiKindEntity> {
   async followOwnerReference<Towner extends ApiKindEntity>(
     apiVersion: Towner["apiVersion"],
     apiKind: Towner["kind"],
-  ) {
+  ): Promise<EntityHandle<Towner> | null>  {
     const snapshot = await this.get();
 
     const ownerName = snapshot?.metadata.ownerReferences

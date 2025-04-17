@@ -4,9 +4,9 @@ import { generateRegistrationOptions, generateAuthenticationOptions, verifyRegis
 import type { AuthenticationResponseJSON, RegistrationResponseJSON } from 'https://deno.land/x/simplewebauthn@v9.0.0/packages/types/src/index.ts';
 import { encodeBase64Url } from "https://deno.land/std@0.208.0/encoding/base64url.ts";
 
-import type { EntityEngine } from "../../portable/engine.ts";
-import type { PasskeyAssociationEntity, PasskeyChallengeEntity, UserEntity } from '../../../apis/login-server/definitions.ts';
-import type { AuthRequestContext, AuthRpcHandler, AuthSystem, AuthnMethod } from "../types.ts";
+import type { EntityEngine } from "../../engine/types.ts";
+import type { PasskeyAssociationEntity, PasskeyChallengeEntity, UserEntity } from '../api/definitions.ts';
+import type { AuthRequestContext, AuthRequestHandler, AuthRpcHandler, AuthSystem, AuthnMethod } from "../types.ts";
 import { PasskeysTab } from '../default-ui/tabs/passkeys.tsx';
 
 export class PasskeyAuthnMethod implements AuthnMethod {
@@ -26,7 +26,7 @@ export class PasskeyAuthnMethod implements AuthnMethod {
     return Promise.resolve(false);
   }
 
-  listPaths() {
+  listPaths(): Record<string, AuthRequestHandler> {
     return {};
   }
   // serveSignin?(auth: AuthSystem, ctx: AuthRequestContext): Promise<Response> {

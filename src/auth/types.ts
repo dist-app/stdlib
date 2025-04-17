@@ -1,7 +1,6 @@
 import { Cookie } from "https://deno.land/std@0.208.0/http/cookie.ts";
-import { UserEntity } from "../../apis/login-server/definitions.ts";
-import { EntityEngine } from "../engine/engine.ts";
-import { EntityStorage } from "../engine/types.ts";
+import { type EntityEngine, type EntityStorage } from "../engine/types.ts";
+import { type UserEntity } from "./api/definitions.ts";
 
 export type AuthnMethodId =
   | 'cookie'

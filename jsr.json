@@ -1,0 +1,32 @@
+{
+  "name": "@dist-app/stdlib",
+  "version": "0.1.0",
+  "license": "MIT",
+  "exports": {
+    "./auth/api/definitions.ts": "./src/auth/api/definitions.ts",
+    "./auth/api/entities.ts": "./src/auth/api/entities.ts",
+    "./auth/authn-methods/cli-code.ts": "./src/auth/authn-methods/cli-code.ts",
+    "./auth/authn-methods/cookie.ts": "./src/auth/authn-methods/cookie.ts",
+    "./auth/authn-methods/oidc.ts": "./src/auth/authn-methods/oidc.ts",
+    "./auth/authn-methods/passkey.ts": "./src/auth/authn-methods/passkey.ts",
+    "./auth/default-ui/auth-style.ts": "./src/auth/default-ui/auth-style.ts",
+    "./auth/default-ui/rpc.ts": "./src/auth/default-ui/rpc.ts",
+    "./auth/framework.ts": "./src/auth/framework.ts",
+    "./auth/request-context.ts": "./src/auth/request-context.ts",
+    "./auth/types.ts": "./src/auth/types.ts",
+    "./ddp/client": "./src/ddp/client/mod.ts",
+    "./ddp/random.ts": "./src/ddp/random.ts",
+    "./ddp/server": "./src/ddp/server/mod.ts",
+    "./ddp/server/livedata.ts": "./src/ddp/server/livedata.ts",
+    "./ddp/server/otlp.ts": "./src/ddp/server/otlp.ts",
+    "./ddp/types.ts": "./src/ddp/types.ts",
+    "./engine/engine.ts": "./src/engine/engine.ts",
+    "./engine/schema/api-definition.ts": "./src/engine/schema/api-definition.ts",
+    "./engine/schema/converter.ts": "./src/engine/schema/converter.ts",
+    "./engine/schema/openapi.ts": "./src/engine/schema/openapi.ts",
+    "./engine/serve-rest.ts": "./src/engine/serve-rest.ts",
+    "./engine/types.ts": "./src/engine/types.ts",
+    "./support/deno-deploy-subhosting": "./src/support/deno-deploy-subhosting/mod.ts",
+    "./support/infisical": "./src/support/infisical/mod.ts"
+  }
+}

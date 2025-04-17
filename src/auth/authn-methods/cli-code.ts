@@ -1,10 +1,7 @@
-import { LoginServerApi } from "../../../apis/login-server/definitions.ts";
-import { OpenidConnectFlowEntity, UserEntity } from "../../../apis/login-server/entities.ts";
-import { validateOidcJwt } from "../../oidc/verifier.ts";
-import { ForeignIdentityTab } from "../default-ui/tabs/foreign-identity.tsx";
-import { AuthRequestContext, AuthRequestHandler, AuthSystem, AuthnMethod } from "../types.ts";
+import { type UserEntity } from "../api/definitions.ts";
+import type { AuthRequestContext, AuthRequestHandler, AuthRpcHandler, AuthSystem, AuthnMethod } from "../types.ts";
 
-// This is a implementation is a stub.
+// This implementation is a stub.
 // You can help dist.app by expanding it.
 
 export class CliCodeAuthnMethod implements AuthnMethod {
@@ -28,7 +25,7 @@ export class CliCodeAuthnMethod implements AuthnMethod {
     // TODO: recognize JWTs in the authorization header
     return Promise.resolve(false);
   }
-  listRpcs() {
+  listRpcs(): Record<string, AuthRpcHandler> {
     return {};
   }
 

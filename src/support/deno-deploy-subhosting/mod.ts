@@ -2,7 +2,7 @@ export {
   SubhostingApiClient,
   type Asset,
   type DatabaseRecord,
-  type DenoDeployProject,
+  type ProjectRecord,
   type DeploymentRecord,
   type DomainRecord,
 } from './client.ts';

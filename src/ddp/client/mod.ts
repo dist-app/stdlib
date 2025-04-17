@@ -11,8 +11,8 @@ const subTracer = trace.getTracer('ddp.subscription');
 import { ClientSentPacket, ServerSentPacket, DocumentPacket } from "../types.ts";
 
 class DDPCollection {
-  public readonly fields = new Map<string,Record<string,unknown>>();
-  handlePacket(packet: DocumentPacket) {
+  public readonly fields: Map<string,Record<string,unknown>> = new Map;
+  handlePacket(packet: DocumentPacket): void {
     switch (packet.msg) {
       case 'added': {
         this.fields.set(packet.id, packet.fields ?? {});
@@ -47,7 +47,7 @@ export class MongoCollection<T extends {_id: string}> {
     private readonly ddpColl: DDPCollection,
   ) {}
 
-  *_findGenerator(selector: Record<string,unknown>, opts?: FindOpts) {
+  *_findGenerator(selector: Record<string,unknown>, opts?: FindOpts): Generator<T> {
     for (const [_id, fields] of this.ddpColl.fields) {
       let matches = true;
       for (const [field, spec] of Object.entries(selector)) {
@@ -80,14 +80,14 @@ export class MongoCollection<T extends {_id: string}> {
     }
   }
 
-  findOne(selector: Record<string,unknown>, opts?: FindOpts) {
+  findOne(selector: Record<string,unknown>, opts?: FindOpts): T | null {
     for (const doc of this._findGenerator(selector, opts)) {
       return doc;
     }
     return null;
   }
 
-  find(selector: Record<string,unknown>, opts?: FindOpts) {
+  find(selector: Record<string,unknown>, opts?: FindOpts): Cursor<T> {
     const iterable = this._findGenerator(selector, opts);
     return {
       [Symbol.iterator]: iterable[Symbol.iterator],
@@ -95,6 +95,11 @@ export class MongoCollection<T extends {_id: string}> {
     };
   }
 }
+
+export type Cursor<T extends {_id: string}> = {
+  [Symbol.iterator]: () => Generator<T>;
+  fetch(): Array<T>;
+};
 
 /** Clones a document using the 'fields' subset. */
 function makeReturnDoc<T extends {_id: string}>(_id: string, original: T, opts?: FindOpts) {
@@ -136,24 +141,24 @@ export class DDPClient {
   }
   private readonly writer: WritableStreamDefaultWriter<string>;
 
-  private readonly collections = new Map<string, DDPCollection>();
-  private readonly pendingMethods = new Map<string, {
+  private readonly collections: Map<string, DDPCollection> = new Map;
+  private readonly pendingMethods: Map<string, {
     // deno-lint-ignore no-explicit-any
     ok: (result: any) => void;
     fail: (error: Error) => void;
     span: Span;
-  }>();
-  private readonly pendingSubs = new Map<string, {
+  }> = new Map;
+  private readonly pendingSubs: Map<string, {
     ok: () => void;
     fail: (error: Error) => void;
     span: Span;
-  }>();
+  }> = new Map;
   // private readonly activeSubs = new Map<string, {
   //   ok: () => void,
   //   fail: (error: Error) => void,
   // }>();
 
-  private grabCollection(collectionName: string) {
+  private grabCollection(collectionName: string): DDPCollection {
     let coll = this.collections.get(collectionName);
     if (!coll) {
       coll = new DDPCollection();
@@ -161,12 +166,12 @@ export class DDPClient {
     }
     return coll;
   }
-  public getCollection<T extends {_id: string}>(collectionName: string) {
+  public getCollection<T extends {_id: string}>(collectionName: string): MongoCollection<T> {
     const coll = this.grabCollection(collectionName);
     return new MongoCollection<T>(coll);
   }
 
-  async callMethod<T=unknown>(name: string, params: unknown[]) {
+  async callMethod<T=unknown>(name: string, params: unknown[]): Promise<T> {
     const methodId = Math.random().toString(16).slice(2);
     const span = methodTracer.startSpan(name, {
       kind: SpanKind.CLIENT,
@@ -193,7 +198,7 @@ export class DDPClient {
     });
   }
 
-  async subscribe(name: string, params: unknown[]) {
+  async subscribe(name: string, params: unknown[]): Promise<void> {
     const subId = Math.random().toString(16).slice(2);
     const span = subTracer.startSpan(name, {
       kind: SpanKind.CLIENT,
@@ -220,7 +225,7 @@ export class DDPClient {
     });
   }
 
-  async runInboundLoop() {
+  async runInboundLoop(): Promise<void> {
     if (this.encapsulation == 'raw') {
       for await (const chunk of this.readable) {
         const packet = EJSON.parse(chunk);
@@ -246,7 +251,7 @@ export class DDPClient {
     }
   }
 
-  async handlePacket(packet: ServerSentPacket) {
+  async handlePacket(packet: ServerSentPacket): Promise<void> {
     if (Deno.args.includes('--debug')) console.debug('<--', packet.msg);
     switch (packet.msg) {
       case 'ping':
@@ -327,7 +332,7 @@ export class DDPClient {
     }
   }
 
-  async sendMessage(packet: ClientSentPacket, traceContext?: Context) {
+  async sendMessage(packet: ClientSentPacket, traceContext?: Context): Promise<void> {
     const baggage: Record<string,string> = {};
     if (traceContext) {
       propagation.inject(traceContext, baggage, {
@@ -344,7 +349,7 @@ export class DDPClient {
     }
   }
 
-  static async connectToUrl(appUrl: string, encapsulation: 'sockjs' | 'raw') {
+  static async connectToUrl(appUrl: string, encapsulation: 'sockjs' | 'raw'): Promise<DDPClient> {
     let sockPath = 'websocket';
 
     if (encapsulation == 'sockjs') {

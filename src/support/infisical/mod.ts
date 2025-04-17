@@ -1,5 +1,5 @@
 import { oidcAuth } from "./auth.ts";
-import { listSecrets } from "./list-secrets.ts";
+import { listSecrets, ListSecretsQuery, ListSecretsResponse } from "./list-secrets.ts";
 
 export const ServerUrl_us = 'https://us.infisical.com/api/';
 export const ServerUrl_eu = 'https://eu.infisical.com/api/';
@@ -32,12 +32,14 @@ export class InfisicalApiClient {
     })
   }
 
-  public readonly listSecrets = listSecrets.bind(null, this);
+  public readonly listSecrets:
+    (query: ListSecretsQuery) => Promise<ListSecretsResponse>
+    = listSecrets.bind(null, this);
 
   async fetchJsonApi<T=unknown>(path: string, opts: RequestInit & {
     bodyJson?: unknown;
     query?: URLSearchParams;
-  }) {
+  }): Promise<T> {
     const url = new URL(path, this.props.serverUrl);
     const headers = new Headers(opts.headers);
     headers.set('authorization', 'Bearer '+await this.props.tokenFactory());

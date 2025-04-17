@@ -4,7 +4,7 @@ import type { DocumentFields, OutboundSubscription, ServerSentPacket } from "../
 export function filterEventStream<T extends ApiKindEntity>(
   stream: ReadableStream<StreamEvent<T>>,
   filterCb: (entity: T) => boolean,
-) {
+): ReadableStream<StreamEvent<T>> {
   const visibleNames = new Set<string>;
   return stream.pipeThrough(new TransformStream<StreamEvent<T>,StreamEvent<T>>({
     transform(event, ctlr) {
@@ -57,7 +57,7 @@ export function renderEventStream<T extends ApiKindEntity>(
   collection: string,
   idCb: (entity: T) => string,
   fieldsCb: (entity: T) => DocumentFields,
-) {
+): ReadableStream<SubscriptionEvent> {
   return stream.pipeThrough(new TransformStream<StreamEvent<T>,SubscriptionEvent>({
     transform(event, ctlr) {
       switch (event.kind) {

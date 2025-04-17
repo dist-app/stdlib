@@ -3,7 +3,7 @@ import {
   type Payload,
   create as createJwt,
   getNumericDate,
-} from "https://deno.land/x/djwt@v3.0.1/mod.ts";
+} from "jsr:@zaubrik/djwt@3.0.2";
 export { getNumericDate };
 
 type StoredKey = {

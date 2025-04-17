@@ -1,6 +1,15 @@
-import { SubhostingApiClient } from "./client.ts";
+import {
+  type DatabaseRecord,
+  type ProjectRecord,
+  type DomainRecord,
+  type SubhostingApiClient,
+} from "./client.ts";
 
-export async function selectOrCreateProject(client: SubhostingApiClient, desiredDescription: string, desiredProjectName?: string) {
+export async function selectOrCreateProject(
+  client: SubhostingApiClient,
+  desiredDescription: string,
+  desiredProjectName?: string,
+): Promise<ProjectRecord> {
   // TODO: as http optimization
   // if (desiredProjectName) {
   //   const project = client.getProject();
@@ -26,7 +35,10 @@ export async function selectOrCreateProject(client: SubhostingApiClient, desired
   return newProject;
 }
 
-export async function selectOrCreateDatabase(client: SubhostingApiClient, desiredDescription: string) {
+export async function selectOrCreateDatabase(
+  client: SubhostingApiClient,
+  desiredDescription: string,
+): Promise<DatabaseRecord> {
   // TODO: as http optimization
   // if (desiredProjectName) {
   //   const project = client.getProject();
@@ -47,7 +59,10 @@ export async function selectOrCreateDatabase(client: SubhostingApiClient, desire
   return newDatabase;
 }
 
-export async function selectOrCreateDomain(client: SubhostingApiClient, desiredDomain: string) {
+export async function selectOrCreateDomain(
+  client: SubhostingApiClient,
+  desiredDomain: string,
+): Promise<DomainRecord> {
   // TODO: as http optimization
   // if (desiredProjectName) {
   //   const project = client.getProject();
