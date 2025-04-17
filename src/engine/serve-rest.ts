@@ -1,6 +1,7 @@
 import type { EntityEngine } from "./engine.ts";
 
-export async function serveKuberestApis(
+/** Mirrors the Kubernetes REST API, backed by the given engine  */
+export async function serveRestApis(
   req: Request,
   url: {pathname: string, search: string},
   engine: EntityEngine,

@@ -1,6 +1,6 @@
 // https://infisical.com/docs/api-reference/endpoints/secrets/list
 
-import { type InfisicalApiClient } from "./client.ts";
+import { type InfisicalApiClient } from "./mod.ts";
 
 export type ListSecretsQuery = {
   metadataFilter?: string; // The secret metadata key-value pairs to filter secrets by. When querying for multiple metadata pairs, the query is treated as an AND operation. Secret metadata format is key=value1,value=value2|key=value3,value=value4.

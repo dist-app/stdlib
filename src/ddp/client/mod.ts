@@ -1,5 +1,7 @@
 import { default as EJSON } from "https://esm.sh/ejson@2.2.3";
 
+// TODO: import 'sift' library to replace our DIY matching
+
 import { trace, SpanKind, SpanStatusCode, Span, context, propagation, Context } from "https://deno.land/x/observability@v0.6.1/opentelemetry/api.js";
 
 const clientTracer = trace.getTracer('ddp.client');

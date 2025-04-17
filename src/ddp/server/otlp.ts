@@ -1,4 +1,4 @@
-import type { DdpInterface } from "../server/ddp-impl.ts";
+import type { DdpInterface } from "./mod.ts";
 
 export function registerOtlpMethods(ddp: DdpInterface) {
   const otlpEndpoint = Deno.env.get('OTEL_EXPORTER_OTLP_ENDPOINT');

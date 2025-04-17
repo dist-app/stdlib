@@ -7,8 +7,6 @@ export class SubhostingApiClient {
     tokenFactory: () => string | Promise<string>;
   }) {}
 
-  // public readonly listSecrets = listSecrets.bind(this);
-
   async fetchApiResponse({path, ...opts}: RequestInit & {
     path: string;
     // query?: URLSearchParams;

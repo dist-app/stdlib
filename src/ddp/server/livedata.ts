@@ -1,7 +1,5 @@
-import type { ApiKindEntity, StreamEvent } from "../../portable/types.ts";
-import type { DdpSocketSubscription } from "../server/ddp-impl.ts";
-import type { DocumentFields } from "../server/publications.ts";
-import type { ServerSentPacket } from "../types.ts";
+import type { ApiKindEntity, StreamEvent } from "../../engine/types.ts";
+import type { DocumentFields, OutboundSubscription, ServerSentPacket } from "../types.ts";
 
 export function filterEventStream<T extends ApiKindEntity>(
   stream: ReadableStream<StreamEvent<T>>,
@@ -109,7 +107,7 @@ export function renderEventStream<T extends ApiKindEntity>(
 }
 
 export function emitToSub(
-  sub: DdpSocketSubscription,
+  sub: OutboundSubscription,
   sources: Array<ReadableStream<SubscriptionEvent>>,
 ) {
   let unreadyCount = sources.length;

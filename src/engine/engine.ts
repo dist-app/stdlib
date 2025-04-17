@@ -1,24 +1,4 @@
-// import { Meteor } from "meteor/meteor";
-// import { ApiKindEntity, NamespaceEntity } from "../entities/core";
-// import { Log } from "../lib/logging";
-// import { ReactiveMap } from "../lib/reactive-map";
-// import { LogicTracer } from "../lib/tracing";
-// // import { AsyncCache, AsyncKeyedCache } from "../runtime/async-cache";
-// import { ShellSession } from "../runtime/ShellSession";
-// import { MongoEntityStorage, MongoProfileStorage, StaticEntityStorage } from "./EntityStorage";
-// import { LayeredNamespace } from "./next-gen";
 
-
-// not sure if this is enough
-// export interface ApiKindEntity extends Record<string,unknown> {
-//   apiVersion: string;
-//   kind: string;
-//   metadata: {
-//     name: string;
-//   } & Record<string,unknown>;
-// }
-
-import { KvEntityStorage } from "../../server-sdk/modules/storage-deno-kv/nonrealtime.ts";
 import { EntityApiDefinition, SchemaApi, type EntityKindEntity } from "./schema/api-definition.ts";
 import type { ApiKindEntity, EntityStorage, StreamEvent } from "./types.ts";
 

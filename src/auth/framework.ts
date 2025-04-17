@@ -1,6 +1,6 @@
 import { LoginServerApi, UserEntity } from "../../apis/login-server/definitions.ts";
-import { EntityEngine } from "../portable/engine.ts";
-import { EntityStorage } from "../portable/types.ts";
+import { EntityEngine } from "../engine/engine.ts";
+import { EntityStorage } from "../engine/types.ts";
 import { authStyle } from "./default-ui/auth-style.ts";
 import { renderLoginPage } from "./default-ui/login-page.tsx";
 import { listUiRpcs } from "./default-ui/rpc.ts";

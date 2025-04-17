@@ -30,6 +30,8 @@ export interface MeteorError {
   errorType?: string; // e.g. "Meteor.Error"
 };
 
+export type DocumentFields = Record<string, unknown>;
+
 export type ServerSentPacket = {
   msg: 'ping' | 'pong';
   id?: string;
@@ -63,12 +65,12 @@ export type ServerSentPacket = {
   msg: 'added';
   collection: string;
   id: string;
-  fields?: Record<string, unknown>;
+  fields?: DocumentFields;
 } | {
   msg: 'changed';
   collection: string;
   id: string;
-  fields?: Record<string, unknown>;
+  fields?: DocumentFields;
   cleared?: Array<string>;
 } | {
   msg: 'removed';
@@ -78,7 +80,7 @@ export type ServerSentPacket = {
   msg: 'addedBefore';
   collection: string;
   id: string;
-  fields?: Record<string, unknown>;
+  fields?: DocumentFields;
   before: string | null;
 } | {
   msg: 'movedBefore';
@@ -92,3 +94,18 @@ export type ServerSentPacket = {
 };
 
 export type DocumentPacket = ServerSentPacket & {msg: 'added' | 'changed' | 'removed' | 'addedBefore' | 'movedBefore'};
+
+export interface OutboundSubscription {
+  stop(error?: MeteorError): void;
+  onStop(callback: () => void): void;
+  // get signal(): AbortSignal;
+
+  get userId(): string | null;
+
+  added(collection: string, id: string, fields: Record<string,unknown>): void;
+  changed(collection: string, id: string, fields: Record<string,unknown>): void;
+  removed(collection: string, id: string): void;
+
+  error(error: Error): void;
+  ready(): void;
+}
