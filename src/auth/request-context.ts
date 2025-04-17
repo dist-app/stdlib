@@ -1,0 +1,60 @@
+import { Cookie, deleteCookie, getCookies, setCookie } from "https://deno.land/std@0.208.0/http/cookie.ts";
+import { AuthRequestContext } from "./types.ts";
+
+export class AuthRequestContextImpl implements AuthRequestContext {
+  constructor(
+    readonly request: Request,
+    readonly connInfo: Deno.ServeHandlerInfo,
+  ) {
+    this.requestUrl = new URL(request.url);
+    this.cookies = getCookies(this.request.headers);
+  }
+  requestUrl: URL;
+  cookies: Record<string,string>;
+  respHeaders = new Headers;
+
+  setCookie(cookie: Cookie) {
+    setCookie(this.respHeaders, cookie);
+  }
+
+  deleteCookie(name: string, attributes: {
+    path?: string;
+    domain?: string;
+  }) {
+    deleteCookie(this.respHeaders, name, attributes);
+  }
+
+  setHeader(name: string, value: string) {
+    this.respHeaders.set(name, value);
+  }
+
+  respondText(status: number, body: string) {
+    return new Response(body, {
+      status: status,
+      headers: this.respHeaders,
+    });
+  }
+
+  async readFormFields() {
+    if (this.request.headers.get('content-type') != 'application/x-www-form-urlencoded') {
+      throw new Error(`unsupported form content-type`);
+    }
+    return new URLSearchParams(await this.request.text());
+  }
+
+  get remoteAddress() {
+    const addr = getRemoteAddress(this.connInfo);
+    return addr.hostname;
+  }
+}
+
+function assertIsNetAddr(addr: Deno.Addr): asserts addr is Deno.NetAddr {
+  if (!['tcp', 'udp'].includes(addr.transport)) {
+    throw new Error('Not a network address');
+  }
+}
+
+function getRemoteAddress(connInfo: Deno.ServeHandlerInfo): Deno.NetAddr {
+  assertIsNetAddr(connInfo.remoteAddr);
+  return connInfo.remoteAddr;
+}
