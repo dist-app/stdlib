@@ -1,6 +1,5 @@
-/** @jsx h */
-/** @jsxFrag Fragment */
-import html, { h, Fragment } from "https://deno.land/x/htm@0.2.1/mod.ts";
+/** @jsx jsx *//** @jsxImportSource jsr:@hono/hono@4.7.7/jsx *//** @jsxFrag Fragment */
+import { html } from "../../html/mod.tsx";
 
 import { UserEntity } from '../api/entities.ts';
 
@@ -35,7 +34,7 @@ export async function renderSettingsPage(auth: AuthSystem, ctx: AuthRequestConte
 
         <ul class="modal-form-tabstrip">
           {pages.map(page => (
-            <li><a href={page.slug} class={pageSlug == page.slug ? 'active' : null}>{page.label}</a></li>
+            <li><a href={page.slug} class={pageSlug == page.slug ? 'active' : void 0}>{page.label}</a></li>
           ))}
         </ul>
 

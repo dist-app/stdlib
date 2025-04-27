@@ -1,6 +1,4 @@
-/** @jsx h */
-/** @jsxFrag Fragment */
-import { h, Fragment } from "https://deno.land/x/htm@0.2.1/mod.ts";
+/** @jsx jsx *//** @jsxImportSource jsr:@hono/hono@4.7.7/jsx *//** @jsxFrag Fragment */
 
 import aaguids from "./passkey-aaguids.json" with { type: "json" };
 // import aaguids from "https://raw.githubusercontent.com/passkeydeveloper/passkey-authenticator-aaguids/32c75cd28e2301fbc15cf9aa08da8ab3acb5a670/aaguid.json" with { type: "json" };

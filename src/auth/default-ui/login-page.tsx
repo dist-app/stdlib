@@ -1,6 +1,5 @@
-/** @jsx h */
-/** @jsxFrag Fragment */
-import html, { h, Fragment } from "https://deno.land/x/htm@0.2.1/mod.ts";
+/** @jsx jsx *//** @jsxImportSource jsr:@hono/hono@4.7.7/jsx *//** @jsxFrag Fragment */
+import { html } from "../../html/mod.tsx";
 
 import { AuthRequestContext, AuthSystem } from "../types.ts";
 
@@ -35,7 +34,7 @@ export function renderLoginPage(auth: AuthSystem, ctx: AuthRequestContext) {
 
       {auth.hasAuthnMethod('oidc') ? (
         <form id="oidc-form" method="post" action="/auth/login/oidc" style="display: none;">
-          <input type="hidden" name="redirect_path" value={ctx.requestUrl.searchParams.get('redirect')} />
+          <input type="hidden" name="redirect_path" value={ctx.requestUrl.searchParams.get('redirect') ?? ''} />
         </form>
       ) : []}
 

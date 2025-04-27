@@ -1,6 +1,4 @@
-/** @jsx h */
-/** @jsxFrag Fragment */
-import { h, Fragment } from "https://deno.land/x/htm@0.2.1/mod.ts";
+/** @jsx jsx *//** @jsxImportSource jsr:@hono/hono@4.7.7/jsx *//** @jsxFrag Fragment */
 
 import type { UserEntity, UserSessionEntity } from '../../api/entities.ts';
 import type { AuthRequestContext, AuthSystem, SettingsTab } from "../../types.ts";
