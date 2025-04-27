@@ -2,9 +2,10 @@
 /** @jsxFrag Fragment */
 import { h, Fragment } from "https://deno.land/x/htm@0.2.1/mod.ts";
 
-import aaguids from "https://raw.githubusercontent.com/passkeydeveloper/passkey-authenticator-aaguids/32c75cd28e2301fbc15cf9aa08da8ab3acb5a670/aaguid.json" with { type: "json" };
+import aaguids from "./passkey-aaguids.json" with { type: "json" };
+// import aaguids from "https://raw.githubusercontent.com/passkeydeveloper/passkey-authenticator-aaguids/32c75cd28e2301fbc15cf9aa08da8ab3acb5a670/aaguid.json" with { type: "json" };
 
-import type { PasskeyAssociationEntity, UserEntity } from '../../../../apis/login-server/entities.ts';
+import type { PasskeyAssociationEntity, UserEntity } from '../../api/entities.ts';
 import type { AuthRequestContext, AuthSystem, SettingsTab } from "../../types.ts";
 
 export const PasskeysTab: SettingsTab = {

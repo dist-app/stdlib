@@ -2,7 +2,7 @@
 /** @jsxFrag Fragment */
 import { h, Fragment } from "https://deno.land/x/htm@0.2.1/mod.ts";
 
-import type { UserEntity, UserSessionEntity } from '../../../../apis/login-server/entities.ts';
+import type { UserEntity, UserSessionEntity } from '../../api/entities.ts';
 import type { AuthRequestContext, AuthSystem, SettingsTab } from "../../types.ts";
 
 export const SessionsTab: SettingsTab = {

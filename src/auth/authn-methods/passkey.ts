@@ -2,7 +2,7 @@
 // https://github.com/MasterKale/SimpleWebAuthn/releases/tag/v10.0.0
 import { generateRegistrationOptions, generateAuthenticationOptions, verifyRegistrationResponse, verifyAuthenticationResponse } from 'https://deno.land/x/simplewebauthn@v9.0.0/deno/server.ts';
 import type { AuthenticationResponseJSON, RegistrationResponseJSON } from 'https://deno.land/x/simplewebauthn@v9.0.0/packages/types/src/index.ts';
-import { encodeBase64Url } from "https://deno.land/std@0.208.0/encoding/base64url.ts";
+import { encodeBase64Url } from "jsr:@std/encoding@1.0.9/base64url";
 
 import type { EntityEngine } from "../../engine/types.ts";
 import type { PasskeyAssociationEntity, PasskeyChallengeEntity, UserEntity } from '../api/definitions.ts';

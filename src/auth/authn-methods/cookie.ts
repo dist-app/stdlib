@@ -1,4 +1,4 @@
-import { UserEntity, UserSessionEntity } from '../../../apis/login-server/entities.ts';
+import { UserEntity, UserSessionEntity } from '../api/entities.ts';
 import { SessionsTab } from '../default-ui/tabs/sessions.tsx';
 import { SignOutTab } from '../default-ui/tabs/sign-out.tsx';
 import { AuthRequestContext, AuthRequestHandler, AuthRpcHandler, AuthSystem, AuthnMethod } from "../types.ts";

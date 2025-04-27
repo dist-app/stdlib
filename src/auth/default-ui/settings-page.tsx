@@ -2,7 +2,7 @@
 /** @jsxFrag Fragment */
 import html, { h, Fragment } from "https://deno.land/x/htm@0.2.1/mod.ts";
 
-import { UserEntity } from '../../../apis/login-server/entities.ts';
+import { UserEntity } from '../api/entities.ts';
 
 import { AuthRequestContext, AuthSystem } from "../types.ts";
 

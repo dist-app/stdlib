@@ -1,4 +1,4 @@
-import { LoginServerApi } from "../../../apis/login-server/definitions.ts";
+import { LoginServerApi } from "../api/definitions.ts";
 import { AuthSystem, AuthRpcHandler } from "../types.ts";
 
 export function listUiRpcs(auth: AuthSystem): Record<string, AuthRpcHandler> {
