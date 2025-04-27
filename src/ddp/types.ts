@@ -1,3 +1,5 @@
+import { type EJSONableProperty } from "jsr:@cloudydeno/ejson@0.1.1";
+
 export type ClientSentPacket = {
   msg: 'ping' | 'pong';
   id?: string;
@@ -9,13 +11,13 @@ export type ClientSentPacket = {
   msg: 'method';
   id: string;
   method: string;
-  params: unknown[];
+  params: EJSONableProperty[];
   randomSeed?: string;
 } | {
   msg: 'sub';
   id: string;
   name: string;
-  params: unknown[];
+  params: EJSONableProperty[];
 } | {
   msg: 'unsub';
   id: string;
@@ -30,7 +32,7 @@ export interface MeteorError {
   errorType?: string; // e.g. "Meteor.Error"
 };
 
-export type DocumentFields = Record<string, unknown>;
+export type DocumentFields = Record<string, EJSONableProperty>;
 
 export type ServerSentPacket = {
   msg: 'ping' | 'pong';
@@ -54,7 +56,7 @@ export type ServerSentPacket = {
 } | {
   msg: 'result';
   id: string;
-  result?: unknown;
+  result?: EJSONableProperty;
   error?: undefined;
 } | {
   msg: 'result';
@@ -102,8 +104,8 @@ export interface OutboundSubscription {
 
   get userId(): string | null;
 
-  added(collection: string, id: string, fields: Record<string,unknown>): void;
-  changed(collection: string, id: string, fields: Record<string,unknown>): void;
+  added(collection: string, id: string, fields: Record<string,EJSONableProperty>): void;
+  changed(collection: string, id: string, fields: Record<string,EJSONableProperty>): void;
   removed(collection: string, id: string): void;
 
   error(error: Error): void;

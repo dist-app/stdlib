@@ -1,11 +1,11 @@
-import { EJSON } from "jsr:@cloudydeno/ejson@0.1.1";
+import { EJSON, type EJSONableProperty } from "jsr:@cloudydeno/ejson@0.1.1";
 import { ROOT_CONTEXT, SpanKind, TextMapGetter, propagation, trace } from "jsr:@cloudydeno/opentelemetry@0.10.0/pkg/api";
 
 import { ClientSentPacket, DocumentFields, MeteorError, OutboundSubscription, ServerSentPacket } from "../types.ts";
 import { RandomStream } from "../random.ts";
 
-export type MethodHandler = (socket: DdpSocket, params: unknown[], random: RandomStream | null) => unknown;
-export type PublicationHandler = (socket: DdpSocketSubscription, params: unknown[]) => void;
+export type MethodHandler = (socket: DdpSocket, params: EJSONableProperty[], random: RandomStream | null) => EJSONableProperty | Promise<EJSONableProperty>;
+export type PublicationHandler = (socket: DdpSocketSubscription, params: EJSONableProperty[]) => Promise<void>;
 
 // We add an extra field on DDP requests for distributed tracing.
 // This is compatible with the meteor package "danopia:opentelemetry".
@@ -41,7 +41,7 @@ export class DdpInterface {
       });
   }
 
-  async callMethod(socket: DdpSocket, name: string, params: unknown[], random: RandomStream | null): Promise<unknown> {
+  async callMethod(socket: DdpSocket, name: string, params: EJSONableProperty[], random: RandomStream | null): Promise<EJSONableProperty> {
     const handler = this.methods.get(name);
     if (!handler) {
       throw new Error(`unimplemented method: "${name}"`);
@@ -49,7 +49,7 @@ export class DdpInterface {
     return await handler(socket, params, random);
   }
 
-  async callSubscribe(sub: DdpSocketSubscription, name: string, params: unknown[]): Promise<void> {
+  async callSubscribe(sub: DdpSocketSubscription, name: string, params: EJSONableProperty[]): Promise<void> {
     const handler = this.publications.get(name);
     if (!handler) {
       throw new Error(`unimplemented sub: "${name}"`);
@@ -95,10 +95,10 @@ export class DdpSocketSubscription implements OutboundSubscription {
     // return this.connection.userId;
   }
 
-  public added(collection: string, id: string, fields: Record<string,unknown>): void {
+  public added(collection: string, id: string, fields: DocumentFields): void {
     this.connection.getCollection(collection).added(this.subId, id, fields);
   }
-  public changed(collection: string, id: string, fields: Record<string,unknown>): void {
+  public changed(collection: string, id: string, fields: DocumentFields): void {
     this.connection.getCollection(collection).changed(this.subId, id, fields);
   }
   public removed(collection: string, id: string): void {

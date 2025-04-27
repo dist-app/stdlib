@@ -1,4 +1,4 @@
-import { EJSON } from "jsr:@cloudydeno/ejson@0.1.1";
+import { EJSON, type EJSONableProperty } from "jsr:@cloudydeno/ejson@0.1.1";
 
 // TODO: import 'sift' library to replace our DIY matching
 
@@ -171,7 +171,7 @@ export class DDPClient {
     return new MongoCollection<T>(coll);
   }
 
-  async callMethod<T=unknown>(name: string, params: unknown[]): Promise<T> {
+  async callMethod<T=EJSONableProperty>(name: string, params: EJSONableProperty[]): Promise<T> {
     const methodId = Math.random().toString(16).slice(2);
     const span = methodTracer.startSpan(name, {
       kind: SpanKind.CLIENT,
@@ -198,7 +198,7 @@ export class DDPClient {
     });
   }
 
-  async subscribe(name: string, params: unknown[]): Promise<void> {
+  async subscribe(name: string, params: EJSONableProperty[]): Promise<void> {
     const subId = Math.random().toString(16).slice(2);
     const span = subTracer.startSpan(name, {
       kind: SpanKind.CLIENT,
@@ -228,7 +228,7 @@ export class DDPClient {
   async runInboundLoop(): Promise<void> {
     if (this.encapsulation == 'raw') {
       for await (const chunk of this.readable) {
-        const packet = EJSON.parse(chunk);
+        const packet = EJSON.parse(chunk) as ServerSentPacket;
         await this.handlePacket(packet);
       }
       return;
@@ -238,7 +238,7 @@ export class DDPClient {
       case 'o': throw new Error(`got second open?`);
       case 'a': {
         for (const pkt of JSON.parse(chunk.slice(1))) {
-          const packet = EJSON.parse(pkt);
+          const packet = EJSON.parse(pkt) as ServerSentPacket;
           await this.handlePacket(packet);
         }
         break;
@@ -387,14 +387,14 @@ export class DDPClient {
         // TODO: the parsing should be handled by a transformstream, read from that instead
         const {value} = await setupReader.read();
         if (value?.[0] !== 'a') throw new Error(`Unexpected connect resp: ${JSON.stringify(value)}`)
-        const packet: ServerSentPacket = JSON.parse(EJSON.parse(value.slice(1))[0]);
+        const packet: ServerSentPacket = EJSON.parse(JSON.parse(value.slice(1))[0]) as ServerSentPacket;
         if (packet.msg !== 'connected') throw new Error(`Unexpected connect msg: ${JSON.stringify(packet)}`);
         // const session = packet.session as string;
 
       } else {
         const {value} = await setupReader.read();
         if (value?.[0] !== '{') throw new Error(`Unexpected connect resp: ${JSON.stringify(value)}`)
-        const packet: ServerSentPacket = EJSON.parse(value);
+        const packet: ServerSentPacket = EJSON.parse(value) as ServerSentPacket;
         if (packet.msg !== 'connected') throw new Error(`Unexpected connect msg: ${JSON.stringify(packet)}`);
       }
     } finally {
