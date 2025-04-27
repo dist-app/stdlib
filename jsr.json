@@ -1,6 +1,6 @@
 {
   "name": "@dist-app/stdlib",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
   "exports": {
     "./auth/api/definitions.ts": "./src/auth/api/definitions.ts",
@@ -10,7 +10,14 @@
     "./auth/authn-methods/oidc.ts": "./src/auth/authn-methods/oidc.ts",
     "./auth/authn-methods/passkey.ts": "./src/auth/authn-methods/passkey.ts",
     "./auth/default-ui/auth-style.ts": "./src/auth/default-ui/auth-style.ts",
+    "./auth/default-ui/login-page.tsx": "./src/auth/default-ui/login-page.tsx",
     "./auth/default-ui/rpc.ts": "./src/auth/default-ui/rpc.ts",
+    "./auth/default-ui/settings-page.tsx": "./src/auth/default-ui/settings-page.tsx",
+    "./auth/default-ui/tabs/foreign-identity.tsx": "./src/auth/default-ui/tabs/foreign-identity.tsx",
+    "./auth/default-ui/tabs/passkeys.tsx": "./src/auth/default-ui/tabs/passkeys.tsx",
+    "./auth/default-ui/tabs/profile.tsx": "./src/auth/default-ui/tabs/profile.tsx",
+    "./auth/default-ui/tabs/sessions.tsx": "./src/auth/default-ui/tabs/sessions.tsx",
+    "./auth/default-ui/tabs/sign-out.tsx": "./src/auth/default-ui/tabs/sign-out.tsx",
     "./auth/framework.ts": "./src/auth/framework.ts",
     "./auth/request-context.ts": "./src/auth/request-context.ts",
     "./auth/types.ts": "./src/auth/types.ts",
@@ -26,6 +33,7 @@
     "./engine/schema/openapi.ts": "./src/engine/schema/openapi.ts",
     "./engine/serve-rest.ts": "./src/engine/serve-rest.ts",
     "./engine/types.ts": "./src/engine/types.ts",
+    "./html/mod.tsx": "./src/html/mod.tsx",
     "./support/deno-deploy-subhosting": "./src/support/deno-deploy-subhosting/mod.ts",
     "./support/infisical": "./src/support/infisical/mod.ts"
   }

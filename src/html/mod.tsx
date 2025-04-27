@@ -167,6 +167,6 @@ function boolFilter<T>(value: T | boolean): value is T {
 }
 
 html.plugins = [] as Plugin[];
-html.use = (...plugin: Plugin[]) => {
+html.use = (...plugin: Plugin[]): void => {
   html.plugins.push(...plugin);
 };

@@ -5,7 +5,7 @@ import { UserEntity } from '../api/entities.ts';
 
 import { AuthRequestContext, AuthSystem } from "../types.ts";
 
-export async function renderSettingsPage(auth: AuthSystem, ctx: AuthRequestContext, user: UserEntity, pageSlug: string) {
+export async function renderSettingsPage(auth: AuthSystem, ctx: AuthRequestContext, user: UserEntity, pageSlug: string): Promise<Response> {
 
   const pages = auth.gatherSettingsTabs(ctx, user);
   const page = pages.find(x => x.slug == pageSlug);

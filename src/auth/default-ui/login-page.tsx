@@ -5,7 +5,7 @@ import { AuthRequestContext, AuthSystem } from "../types.ts";
 
 // UI bits based on https://github.com/stardustapp/graveyard/blob/9b3e7939dca4f49cca0f23f699b3910a2d1d8603/dust-server/src/daemon/gate-site.js
 
-export function renderLoginPage(auth: AuthSystem, ctx: AuthRequestContext) {
+export function renderLoginPage(auth: AuthSystem, ctx: AuthRequestContext): Promise<Response> {
   console.log({
     oidc: auth.hasAuthnMethod('oidc'),
     cliCode: auth.hasAuthnMethod('cli-code'),

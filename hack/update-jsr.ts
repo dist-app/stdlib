@@ -5,8 +5,8 @@ import { expandGlob } from "jsr:@std/fs@0.229.3/expand-glob";
 
 const contents = JSON.parse(await Deno.readTextFile('jsr.json'));
 contents.exports = await getExports([
-  "./src/*.ts",
-  "./src/**/*.ts",
+  "./src/*.ts*",
+  "./src/**/*.ts*",
 ]);
 await Deno.writeTextFile('jsr.json', JSON.stringify(contents, null, 2));
 

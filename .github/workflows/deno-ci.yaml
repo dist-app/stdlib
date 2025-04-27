@@ -34,6 +34,9 @@ jobs:
     # - name: Test
     #   run: time deno test --allow-net ./test/*.ts
 
+    - name: Ensure jsr.json is clean
+      run: hack/update-jsr.ts
+
     - name: Check publish rules
       run: time deno publish --dry-run
 
