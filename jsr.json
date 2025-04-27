@@ -33,7 +33,7 @@
     "./engine/schema/openapi.ts": "./src/engine/schema/openapi.ts",
     "./engine/serve-rest.ts": "./src/engine/serve-rest.ts",
     "./engine/types.ts": "./src/engine/types.ts",
-    "./html/mod.tsx": "./src/html/mod.tsx",
+    "./html": "./src/html/mod.tsx",
     "./support/deno-deploy-subhosting": "./src/support/deno-deploy-subhosting/mod.ts",
     "./support/infisical": "./src/support/infisical/mod.ts"
   }

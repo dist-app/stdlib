@@ -22,8 +22,9 @@ async function getExports(paths: string[]): Promise<Record<string, string>> {
       const name = "." + entry.path.slice(`${root}/src`.length);
       const target = "." + entry.path.slice(root.length);
 
-      if (name.endsWith('/mod.ts')) {
-        exports.push([name.replace('/mod.ts', ''), target]);
+      const modRegex = /\/mod\.tsx?$/;
+      if (name.match(modRegex)) {
+        exports.push([name.replace(modRegex, ''), target]);
         continue;
       }
       if (name.includes('/support/')) {
