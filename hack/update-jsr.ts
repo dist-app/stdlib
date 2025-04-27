@@ -8,7 +8,7 @@ contents.exports = await getExports([
   "./src/*.ts*",
   "./src/**/*.ts*",
 ]);
-await Deno.writeTextFile('jsr.json', JSON.stringify(contents, null, 2));
+await Deno.writeTextFile('jsr.json', JSON.stringify(contents, null, 2) + '\n');
 
 async function getExports(paths: string[]): Promise<Record<string, string>> {
   const exports: [string, string][] = [];
