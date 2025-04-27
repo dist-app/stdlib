@@ -1,8 +1,6 @@
-// v10 changes some datatypes:
-// https://github.com/MasterKale/SimpleWebAuthn/releases/tag/v10.0.0
-import { generateRegistrationOptions, generateAuthenticationOptions, verifyRegistrationResponse, verifyAuthenticationResponse } from 'https://deno.land/x/simplewebauthn@v9.0.0/deno/server.ts';
-import type { AuthenticationResponseJSON, RegistrationResponseJSON } from 'https://deno.land/x/simplewebauthn@v9.0.0/packages/types/src/index.ts';
-import { encodeBase64Url } from "jsr:@std/encoding@1.0.9/base64url";
+import { generateRegistrationOptions, generateAuthenticationOptions, verifyRegistrationResponse, verifyAuthenticationResponse } from 'jsr:@simplewebauthn/server@13.1.1';
+import type { AuthenticationResponseJSON, RegistrationResponseJSON } from 'jsr:@simplewebauthn/types@12.0.0';
+import { encodeBase64Url, decodeBase64Url } from "jsr:@std/encoding@1.0.9/base64url";
 
 import type { EntityEngine } from "../../engine/types.ts";
 import type { PasskeyAssociationEntity, PasskeyChallengeEntity, UserEntity } from '../api/definitions.ts';
@@ -88,11 +86,11 @@ export class PasskeyAuthnMethod implements AuthnMethod {
         const options = await generateRegistrationOptions({
           rpName: this.rpName,
           rpID: this.rpID,
-          userID: user.metadata.uid!,
+          userID: new TextEncoder().encode(user.metadata.uid!),
           userName: user.metadata.name,
           userDisplayName: user.spec.profile.contactEmail,
           excludeCredentials: existingPasskeys.map(x => ({
-            id: x.spec.credential.id,
+            id: encodeBase64Url(x.spec.credential.id),
             type: 'public-key',
             transports: x.spec.credential.transports,
           })),
@@ -126,7 +124,7 @@ export class PasskeyAuthnMethod implements AuthnMethod {
 
         const hPasskeyAssociation = auth.index.getEntityHandle<PasskeyAssociationEntity>(
           'login-server.dist.app/v1alpha1', 'PasskeyAssociation',
-          encodeBase64Url(verification.registrationInfo.credentialID));
+          encodeBase64Url(verification.registrationInfo.credential.id));
         if (await hPasskeyAssociation.get()) {
           throw new Error(`That passkey is already known to this server.`);
         }
@@ -135,15 +133,15 @@ export class PasskeyAuthnMethod implements AuthnMethod {
           apiVersion: 'login-server.dist.app/v1alpha1',
           kind: 'PasskeyAssociation',
           metadata: {
-            name: encodeBase64Url(verification.registrationInfo.credentialID),
+            name: encodeBase64Url(verification.registrationInfo.credential.id),
           },
           spec: {
             userName: user.metadata.name,
             credential: {
               backedUp: verification.registrationInfo.credentialBackedUp,
               deviceType: verification.registrationInfo.credentialDeviceType,
-              id: verification.registrationInfo.credentialID,
-              publicKey: verification.registrationInfo.credentialPublicKey,
+              id: decodeBase64Url(verification.registrationInfo.credential.id),
+              publicKey: verification.registrationInfo.credential.publicKey,
               //@ts-expect-error: docs say it's there...
               transports: verification.registrationInfo.transports,
             },
@@ -156,7 +154,7 @@ export class PasskeyAuthnMethod implements AuthnMethod {
             },
           },
           status: {
-            counter: verification.registrationInfo.counter || void 0,
+            counter: verification.registrationInfo.credential.counter || void 0,
             lastSeen: new Date,
           },
         });
@@ -195,10 +193,10 @@ export class PasskeyAuthnMethod implements AuthnMethod {
           expectedChallenge: challenge,
           expectedOrigin: new URL(auth.selfBaseUrl).origin,
           expectedRPID: this.rpID,
-          authenticator: {
+          credential: {
+            id: encodeBase64Url(passkey.spec.credential.id),
+            publicKey: passkey.spec.credential.publicKey,
             counter: passkey.status?.counter ?? 0,
-            credentialID: passkey.spec.credential.id,
-            credentialPublicKey: passkey.spec.credential.publicKey,
             transports: passkey.spec.credential.transports,
           },
         });

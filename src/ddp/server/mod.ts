@@ -193,7 +193,7 @@ export class DdpSocket {
   public readonly closePromise: Promise<void>;
 
   private readonly closeCtlr = new AbortController();
-  public readonly closeSignal = this.closeCtlr.signal;
+  public get closeSignal(): AbortSignal { return this.closeCtlr.signal; }
 
   public readonly subscriptions: Map<string, DdpSocketSubscription> = new Map;
 
