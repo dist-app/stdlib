@@ -19,10 +19,10 @@ async function getExports(paths: string[]): Promise<Record<string, string>> {
       if (entry.isDirectory) {
         continue;
       }
-      const name = "." + entry.path.slice(`${root}/src`.length);
+      const name = "." + entry.path.slice(`${root}/src`.length).replace(/\.tsx?$/, '');
       const target = "." + entry.path.slice(root.length);
 
-      const modRegex = /\/mod\.tsx?$/;
+      const modRegex = /\/mod$/;
       if (name.match(modRegex)) {
         exports.push([name.replace(modRegex, ''), target]);
         continue;
@@ -31,10 +31,10 @@ async function getExports(paths: string[]): Promise<Record<string, string>> {
         continue;
       }
 
-      if (!mustBeIgnored(name)) {
+      if (!mustBeIgnored(target)) {
         exports.push([name, target]);
 
-        if (name.match(/^\.\/mod\.\w+$/)) {
+        if (name == './mod') {
           exports.push([".", target]);
         }
       }
