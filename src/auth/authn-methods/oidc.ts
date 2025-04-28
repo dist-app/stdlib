@@ -1,4 +1,4 @@
-import { validateOidcJwt } from "../../support/oidc/verifier.ts";
+import { validateOidcJwt } from "../../support/oidc-verifier.ts";
 import { LoginServerApi, type OpenidConnectFlowEntity, type UserEntity } from "../api/definitions.ts";
 import { ForeignIdentityTab } from "../default-ui/tabs/foreign-identity.tsx";
 import { AuthRequestContext, AuthRequestHandler, AuthRpcHandler, AuthSystem, AuthnMethod } from "../types.ts";

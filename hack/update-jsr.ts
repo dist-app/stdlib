@@ -27,7 +27,7 @@ async function getExports(paths: string[]): Promise<Record<string, string>> {
         exports.push([name.replace(modRegex, ''), target]);
         continue;
       }
-      if (name.includes('/support/')) {
+      if (name.match(/\/support\/[^\/]+\//)) {
         continue;
       }
 

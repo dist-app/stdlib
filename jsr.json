@@ -33,8 +33,11 @@
     "./engine/schema/openapi.ts": "./src/engine/schema/openapi.ts",
     "./engine/serve-rest.ts": "./src/engine/serve-rest.ts",
     "./engine/types.ts": "./src/engine/types.ts",
-    "./html": "./src/html/mod.tsx",
     "./support/deno-deploy-subhosting": "./src/support/deno-deploy-subhosting/mod.ts",
-    "./support/infisical": "./src/support/infisical/mod.ts"
+    "./support/html": "./src/support/html/mod.tsx",
+    "./support/infisical": "./src/support/infisical/mod.ts",
+    "./support/logic-tracer.ts": "./src/support/logic-tracer.ts",
+    "./support/oidc-issuer.ts": "./src/support/oidc-issuer.ts",
+    "./support/oidc-verifier.ts": "./src/support/oidc-verifier.ts"
   }
 }

@@ -1,5 +1,5 @@
 /** @jsx jsx *//** @jsxImportSource jsr:@hono/hono@4.7.7/jsx *//** @jsxFrag Fragment */
-import { html } from "../../html/mod.tsx";
+import { html } from "../../support/html/mod.tsx";
 
 import { UserEntity } from '../api/entities.ts';
 
