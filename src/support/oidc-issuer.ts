@@ -16,6 +16,14 @@ type StoredKey = {
   algorithm: KeyAlgorithm;
 }
 
+type SigningKey = {
+  header: {
+    kid: string;
+    alg: Header["alg"];
+  };
+  privateKey: CryptoKey;
+}
+
 export class OidcIssuer {
   constructor(
     private readonly kv: Deno.Kv,
@@ -23,12 +31,12 @@ export class OidcIssuer {
     public readonly keyGenOptions: RsaHashedKeyGenParams | EcKeyGenParams,
   ) {}
 
-  async getCurrentPrivateKey() {
+  async getCurrentPrivateKey(): Promise<SigningKey> {
     const foundKey = await this.getLatestPrivateKeyIfAny();
     return foundKey ?? await this.issueNewKey();
   }
 
-  async getCurrentKeys() {
+  async getCurrentKeys(): Promise<Array<JsonWebKey & { kid: string }>> {
     const keys: Array<JsonWebKey & { kid: string }> = [];
     const oldestReasonable = Date.now() - (1000 * 60 * 60 * 24); // one day old
     const iter = this.kv.list({
@@ -51,7 +59,7 @@ export class OidcIssuer {
     return keys;
   }
 
-  async dropOldKeys() {
+  async dropOldKeys(): Promise<void> {
     const oldestReasonable = Date.now() - ((1000 * 60 * 60) * 24); // one day old
     const mutations = new Array<Deno.KvMutation>();
     const iter = this.kv.list({
@@ -75,7 +83,7 @@ export class OidcIssuer {
     console.log('Dropped', mutations.length, 'old signing keys');
   }
 
-  async getLatestPrivateKeyIfAny() {
+  async getLatestPrivateKeyIfAny(): Promise<SigningKey | null> {
     const oldestReasonable = Date.now() - ((1000 * 60 * 60) * 12); // some hours old
     const iter = await this.kv.list({
       prefix: [...this.kvPrefix],
@@ -105,7 +113,7 @@ export class OidcIssuer {
   }
 
   // TODO: this can easily create numerous keys per renewal if called frequently enough
-  async issueNewKey() {
+  async issueNewKey(): Promise<SigningKey> {
     // console.log('making new key');
 
     // seems like this can take 50-100 ms
@@ -138,7 +146,7 @@ export class OidcIssuer {
     };
   }
 
-  async signJwt(claims: Payload) {
+  async signJwt(claims: Payload): Promise<string> {
     const signingKey = await this.getCurrentPrivateKey();
     const jwt = await createJwt(signingKey.header, {
       "exp": getNumericDate(5 * 60),

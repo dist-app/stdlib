@@ -139,7 +139,7 @@ export interface EntityEngine {
 
 export interface EntityStorage {
   insertEntity<T extends ApiKindEntity>(definition: EntityKindEntity, entity: T): Promise<void>;
-  /** @deprecated to be replaced with an external helper function */ listAllEntities(): Promise<ApiKindEntity[]>;
+  /** @deprecated to be replaced with an external helper function */ listAllEntities?(): Promise<ApiKindEntity[]>;
   listEntities<T extends ApiKindEntity>(definition: EntityKindEntity, apiVersion: T["apiVersion"], kind: T["kind"]): Promise<T[]>;
   observeEntities<T extends ApiKindEntity>(definition: EntityKindEntity, apiVersion: T["apiVersion"], kind: T["kind"], signal: AbortSignal): ReadableStream<StreamEvent<T>>;
   getEntity<T extends ApiKindEntity>(definition: EntityKindEntity, apiVersion: T["apiVersion"], kind: T["kind"], name: string): Promise<T | null>;

@@ -1,4 +1,5 @@
 import {
+  type Context,
   context,
   propagation,
   SpanKind,
@@ -12,7 +13,7 @@ import {
 
 // copy of https://github.com/danopia/dist-app-meteor/blob/7b467622fd2affdf8d6f85baa70052521be9bfb7/imports/lib/tracing.ts#L69
 
-export function injectTraceAnnotations() {
+export function injectTraceAnnotations(): Record<string, string> {
   const annotations: Record<string,string> = {};
   propagation.inject(context.active(), annotations, annotationSetter);
   return annotations;
@@ -23,7 +24,7 @@ const annotationSetter: TextMapSetter<Record<string, string>> = {
   },
 };
 
-export function extractTraceAnnotations(annotations: Record<string,string | undefined>) {
+export function extractTraceAnnotations(annotations: Record<string,string | undefined>): Context {
   return propagation.extract(context.active(), annotations, annotationGetter);
 }
 const annotationGetter: TextMapGetter<Record<string, string | undefined>> = {
@@ -56,7 +57,7 @@ export class LogicTracer {
   >(
     originalMethod: (...args: Targs) => Promise<Tret>,
     context: ClassMethodDecoratorContext<Tthis, (this: Tthis, ...args: Targs) => Promise<Tret>>,
-  ) {
+  ): (...args: Targs) => Promise<Tret> {
     const asyncSpan = this.asyncSpan.bind(this);
     return function (this: Tthis, ...args: Targs): Promise<Tret> {
       return asyncSpan(context.name.toString(), {
@@ -66,11 +67,11 @@ export class LogicTracer {
   }
 
   /** Runs an async function within a new span, and then ends the span upon completion */
-  async asyncSpan<T>(
+  async asyncSpan<Tret>(
     spanName: string,
     options: SpanOptions,
-    func: (span: Span | null) => Promise<T> | T,
-  ) {
+    func: (span: Span | null) => Promise<Tret> | Tret,
+  ): Promise<Tret> {
     // if (!trace.getActiveSpan()) {
     //   const err = new Error('no parent span for '+spanName);
     //   if (!err.stack?.includes('new Computation')) console.warn('WARN:', err.stack);
@@ -96,11 +97,11 @@ export class LogicTracer {
   }
 
   /** Runs an sync function within a new span, and then ends the span upon return */
-  syncSpan<T>(
+  syncSpan<Tret>(
     spanName: string,
     options: SpanOptions,
-    func: (span: Span | null) => T,
-  ) {
+    func: (span: Span | null) => Tret,
+  ): Tret {
     // if (!trace.getActiveSpan()
     //     && !spanName.startsWith('ShellSession task:')
     //     && !spanName.startsWith('MessageHost rpc:')) {
@@ -136,7 +137,7 @@ export class LogicTracer {
     options: SpanOptions,
     func: (...args: Targs) => Promise<Tret>,
     thisArg?: unknown,
-  ) {
+  ): (...args: Targs) => Promise<Tret> {
     return (...args: Targs) =>
       this.asyncSpan(spanName, options, () =>
         func.apply(thisArg, args));
@@ -150,13 +151,13 @@ export class LogicTracer {
     spanName: string,
     options: SpanOptions,
     func: (...args: Targs) => Tret,
-  ) {
+  ): (...args: Targs) => Tret {
     return (...args: Targs) =>
       this.syncSpan(spanName, options, () =>
         func.apply(null, args));
   }
 
-  async tracedInterval<T>(func: () => Promise<T>, delayMs: number) {
+  async tracedInterval<T>(func: () => Promise<T>, delayMs: number): Promise<number> {
     const funcName = func.name || `${func.toString().slice(0, 50)}...` || '(anonymous)';
     return setInterval(this.wrapAsyncWithSpan(funcName, {
       attributes: {
@@ -165,7 +166,7 @@ export class LogicTracer {
     }, func), delayMs);
   }
 
-  async tracedTimeout<T>(func: () => Promise<T>, delayMs: number) {
+  async tracedTimeout<T>(func: () => Promise<T>, delayMs: number): Promise<number> {
     const funcName = func.name || `${func.toString().slice(0, 50)}...` || '(anonymous)';
     return setTimeout(() => this.asyncSpan(funcName, {
       attributes: {
@@ -179,8 +180,8 @@ export class LogicTracer {
 const defaultTracer = new LogicTracer({
   name: 'async_func',
 });
-export const asyncSpan = defaultTracer.asyncSpan.bind(defaultTracer);
-export const syncSpan = defaultTracer.syncSpan.bind(defaultTracer);
-export const wrapAsyncWithSpan = defaultTracer.wrapAsyncWithSpan.bind(defaultTracer);
-export const tracedInterval = defaultTracer.tracedInterval.bind(defaultTracer);
-export const tracedTimeout = defaultTracer.tracedTimeout.bind(defaultTracer);
+export const asyncSpan: LogicTracer['asyncSpan'] = defaultTracer.asyncSpan.bind(defaultTracer);
+export const syncSpan: LogicTracer['syncSpan'] = defaultTracer.syncSpan.bind(defaultTracer);
+export const wrapAsyncWithSpan: LogicTracer['wrapAsyncWithSpan'] = defaultTracer.wrapAsyncWithSpan.bind(defaultTracer);
+export const tracedInterval: LogicTracer['tracedInterval'] = defaultTracer.tracedInterval.bind(defaultTracer);
+export const tracedTimeout: LogicTracer['tracedTimeout'] = defaultTracer.tracedTimeout.bind(defaultTracer);
