@@ -33,6 +33,7 @@
     "./engine/schema/openapi": "./src/engine/schema/openapi.ts",
     "./engine/serve-rest": "./src/engine/serve-rest.ts",
     "./engine/storage/idb": "./src/engine/storage/idb.ts",
+    "./engine/storage/in-memory": "./src/engine/storage/in-memory.ts",
     "./engine/storage/navigation": "./src/engine/storage/navigation.ts",
     "./engine/types": "./src/engine/types.ts",
     "./support/deno-deploy-subhosting": "./src/support/deno-deploy-subhosting/mod.ts",
