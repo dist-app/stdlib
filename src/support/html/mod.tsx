@@ -1,4 +1,4 @@
-/** @jsx jsx *//** @jsxImportSource jsr:@hono/hono@4.7.7/jsx */
+/** @jsxRuntime automatic *//** @jsxImportSource jsr:@hono/hono@4.7.7/jsx */
 import type { JSX } from "jsr:@hono/hono@4.7.7/jsx/jsx-runtime";
 
 export interface HtmlOptions {

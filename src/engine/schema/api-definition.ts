@@ -4,7 +4,7 @@ export const EntityKindEntityKind: EntityKindEntity = {
   apiVersion: 'schema.dist.app/v1alpha1',
   kind: 'EntityKind',
   metadata: {
-    name: 'EntityKinds.login-server.dist.app',
+    name: 'entitykinds.schema.dist.app',
   },
   spec: {
     group: 'schema.dist.app',

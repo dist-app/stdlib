@@ -7,15 +7,14 @@
 On every `.tsx` file, set up hono JSX:
 
 ```ts
-/** @jsx jsx *//** @jsxImportSource jsr:@hono/hono@4.7.7/jsx *//** @jsxFrag Fragment */
+/** @jsxRuntime automatic *//** @jsxImportSource jsr:@hono/hono@4.7.7/jsx */
 ```
 
 or not all together:
 
 ```ts
-/** @jsx jsx */
+/** @jsxRuntime automatic */
 /** @jsxImportSource jsr:@hono/hono@4.7.7/jsx */
-/** @jsxFrag Fragment */
 ```
 
 ## Imports
