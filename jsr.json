@@ -39,7 +39,6 @@
     "./support/deno-deploy-subhosting": "./src/support/deno-deploy-subhosting/mod.ts",
     "./support/html": "./src/support/html/mod.tsx",
     "./support/infisical": "./src/support/infisical/mod.ts",
-    "./support/logic-tracer": "./src/support/logic-tracer.ts",
     "./support/oidc-issuer": "./src/support/oidc-issuer.ts",
     "./support/oidc-verifier": "./src/support/oidc-verifier.ts"
   }
