@@ -52,6 +52,12 @@ export interface EntityHandle<Tself extends ApiKindEntity> {
     name: string,
   ): EntityHandle<Tother>;
 
+  /** @deprecated Prefer EntitySnapshot.followOwnerReference once available */
+  followOwnerReference<Towner extends ApiKindEntity>(
+    apiVersion: Towner["apiVersion"],
+    apiKind: Towner["kind"],
+  ): Promise<EntityHandle<Towner> | null>;
+
   get(): Promise<Tself | null>;
   insert(
     entity: Omit<Tself, 'apiVersion' | 'kind'> & {metadata?: {name?: undefined}},
