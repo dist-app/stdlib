@@ -387,14 +387,14 @@ export class DDPClient {
         // TODO: the parsing should be handled by a transformstream, read from that instead
         const {value} = await setupReader.read();
         if (value?.[0] !== 'a') throw new Error(`Unexpected connect resp: ${JSON.stringify(value)}`)
-        const packet: ServerSentPacket = EJSON.parse(JSON.parse(value.slice(1))[0]) as ServerSentPacket;
+        const packet = EJSON.parse(JSON.parse(value.slice(1))[0]) as ServerSentPacket;
         if (packet.msg !== 'connected') throw new Error(`Unexpected connect msg: ${JSON.stringify(packet)}`);
         // const session = packet.session as string;
 
       } else {
         const {value} = await setupReader.read();
         if (value?.[0] !== '{') throw new Error(`Unexpected connect resp: ${JSON.stringify(value)}`)
-        const packet: ServerSentPacket = EJSON.parse(value) as ServerSentPacket;
+        const packet = EJSON.parse(value) as ServerSentPacket;
         if (packet.msg !== 'connected') throw new Error(`Unexpected connect msg: ${JSON.stringify(packet)}`);
       }
     } finally {
