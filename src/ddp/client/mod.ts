@@ -2,7 +2,7 @@ import { EJSON, type EJSONableProperty } from "jsr:@cloudydeno/ejson@0.1.1";
 
 // TODO: import 'sift' library to replace our DIY matching
 
-import { trace, SpanKind, SpanStatusCode, Span, context, propagation, Context } from "jsr:@cloudydeno/opentelemetry@0.10.0/pkg/api";
+import { trace, SpanKind, SpanStatusCode, Span, context, propagation, Context } from "jsr:@cloudydeno/opentelemetry@0.10.1/pkg/api";
 
 const clientTracer = trace.getTracer('ddp.client');
 const methodTracer = trace.getTracer('ddp.method');
