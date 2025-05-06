@@ -1,6 +1,6 @@
 import { generateRegistrationOptions, generateAuthenticationOptions, verifyRegistrationResponse, verifyAuthenticationResponse } from 'jsr:@simplewebauthn/server@13.1.1';
 import type { AuthenticationResponseJSON, RegistrationResponseJSON } from 'jsr:@simplewebauthn/types@12.0.0';
-import { encodeBase64Url, decodeBase64Url } from "jsr:@std/encoding@1.0.9/base64url";
+import { encodeBase64Url, decodeBase64Url } from "jsr:@std/encoding@1.0.10/base64url";
 
 import type { EntityEngine } from "../../engine/types.ts";
 import type { PasskeyAssociationEntity, PasskeyChallengeEntity, UserEntity } from '../api/definitions.ts';

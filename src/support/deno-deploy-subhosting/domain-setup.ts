@@ -1,6 +1,6 @@
 #!/usr/bin/env -S deno run --allow-env --allow-net=api.deno.com --allow-run=deno,kubectl --allow-read=. --no-prompt
 
-import { decodeBase64 } from "jsr:@std/encoding@1.0.9";
+import { decodeBase64 } from "jsr:@std/encoding@1.0.10";
 
 import { type RestClient } from "jsr:@cloudydeno/kubernetes-client@0.7.3";
 import { CoreV1Api } from "jsr:@cloudydeno/kubernetes-apis@0.5.2/core/v1";
