@@ -5,7 +5,7 @@ import { ClientSentPacket, DocumentFields, MeteorError, OutboundSubscription, Se
 import { RandomStream } from "../random.ts";
 
 export type MethodHandler = (socket: DdpSocket, params: EJSONableProperty[], random: RandomStream | null) => EJSONableProperty | Promise<EJSONableProperty>;
-export type PublicationHandler = (socket: DdpSocketSubscription, params: EJSONableProperty[]) => Promise<void>;
+export type PublicationHandler = (socket: DdpSocketSubscription, params: EJSONableProperty[]) => Promise<void> | void;
 
 // We add an extra field on DDP requests for distributed tracing.
 // This is compatible with the meteor package "danopia:opentelemetry".
