@@ -252,7 +252,7 @@ export class DDPClient {
   }
 
   async handlePacket(packet: ServerSentPacket): Promise<void> {
-    if (Deno.args.includes('--debug')) console.debug('<--', packet.msg);
+    if (globalThis.Deno?.args.includes('--debug')) console.debug('<--', packet.msg);
     switch (packet.msg) {
       case 'ping':
         await this.sendMessage({ msg: 'pong', id: packet.id });
@@ -341,7 +341,7 @@ export class DDPClient {
     }
     const fullPacket = { ...packet, baggage };
 
-    if (Deno.args.includes('--debug')) console.debug('-->', fullPacket.msg, fullPacket.baggage);
+    if (globalThis.Deno?.args.includes('--debug')) console.debug('-->', fullPacket.msg, fullPacket.baggage);
     if (this.encapsulation == 'raw') {
       await this.writer.write(EJSON.stringify(fullPacket));
     } else {
