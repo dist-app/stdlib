@@ -7,14 +7,14 @@
 On every `.tsx` file, set up hono JSX:
 
 ```ts
-/** @jsxRuntime automatic *//** @jsxImportSource jsr:@hono/hono@4.7.7/jsx */
+/** @jsxRuntime automatic *//** @jsxImportSource @hono/hono/jsx */
 ```
 
 or not all together:
 
 ```ts
 /** @jsxRuntime automatic */
-/** @jsxImportSource jsr:@hono/hono@4.7.7/jsx */
+/** @jsxImportSource @hono/hono/jsx */
 ```
 
 ## Imports
@@ -24,5 +24,5 @@ or not all together:
 import { html } from "../../html/html.tsx";
 
 // when using JSX types in your code explicitly e.g. JSX.Element:
-import type { JSX } from "jsr:@hono/hono@4.7.7/jsx/jsx-runtime";
+import type { JSX } from "@hono/hono/jsx/jsx-runtime";
 ```

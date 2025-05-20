@@ -1,7 +1,21 @@
 {
   "name": "@dist-app/stdlib",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "license": "MIT",
+  "imports": {
+    "@cloudydeno/ejson": "jsr:@cloudydeno/ejson@^0.1",
+    "@cloudydeno/kubernetes-apis": "jsr:@cloudydeno/kubernetes-apis@^0.5",
+    "@cloudydeno/kubernetes-client": "jsr:@cloudydeno/kubernetes-client@^0.7",
+    "@cloudydeno/opentelemetry": "jsr:@cloudydeno/opentelemetry@^0.10",
+    "@hono/hono": "jsr:@hono/hono@^4",
+    "@simplewebauthn/server": "jsr:@simplewebauthn/server@^13.1.1",
+    "@simplewebauthn/types": "jsr:@simplewebauthn/types@^12.0.0",
+    "@std/encoding": "jsr:@std/encoding@^1",
+    "@std/fs": "jsr:@std/fs@^1",
+    "@std/http": "jsr:@std/http@^1",
+    "@std/streams": "jsr:@std/streams@^1",
+    "@zaubrik/djwt": "jsr:@zaubrik/djwt@^3"
+  },
   "exports": {
     "./auth/api/definitions": "./src/auth/api/definitions.ts",
     "./auth/api/entities": "./src/auth/api/entities.ts",
@@ -41,5 +55,9 @@
     "./support/infisical": "./src/support/infisical/mod.ts",
     "./support/oidc-issuer": "./src/support/oidc-issuer.ts",
     "./support/oidc-verifier": "./src/support/oidc-verifier.ts"
-  }
+  },
+  "exclude": [
+    "hack",
+    ".github"
+  ]
 }

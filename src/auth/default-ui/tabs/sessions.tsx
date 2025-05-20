@@ -1,4 +1,4 @@
-/** @jsxRuntime automatic *//** @jsxImportSource jsr:@hono/hono@4.7.7/jsx */
+/** @jsxRuntime automatic *//** @jsxImportSource @hono/hono/jsx */
 
 import type { UserEntity, UserSessionEntity } from '../../api/entities.ts';
 import type { AuthRequestContext, AuthSystem, SettingsTab } from "../../types.ts";

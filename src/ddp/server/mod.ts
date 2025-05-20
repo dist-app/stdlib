@@ -1,7 +1,7 @@
-import { EJSON, type EJSONableProperty } from "jsr:@cloudydeno/ejson@0.1.1";
-import { ROOT_CONTEXT, SpanKind, TextMapGetter, propagation, trace } from "jsr:@cloudydeno/opentelemetry@0.10.1/pkg/api";
+import { EJSON, type EJSONableProperty } from "@cloudydeno/ejson";
+import { ROOT_CONTEXT, SpanKind, type TextMapGetter, propagation, trace } from "@cloudydeno/opentelemetry/pkg/api";
 
-import { ClientSentPacket, DocumentFields, MeteorError, OutboundSubscription, ServerSentPacket } from "../types.ts";
+import type { ClientSentPacket, DocumentFields, MeteorError, OutboundSubscription, ServerSentPacket } from "../types.ts";
 import { RandomStream } from "../random.ts";
 
 export type MethodHandler = (socket: DdpSocket, params: EJSONableProperty[], random: RandomStream | null) => EJSONableProperty | Promise<EJSONableProperty>;

@@ -1,4 +1,4 @@
-/** @jsxRuntime automatic *//** @jsxImportSource jsr:@hono/hono@4.7.7/jsx */
+/** @jsxRuntime automatic *//** @jsxImportSource @hono/hono/jsx */
 import { html } from "../../support/html/mod.tsx";
 
 import { UserEntity } from '../api/entities.ts';

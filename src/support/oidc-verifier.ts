@@ -1,7 +1,7 @@
 import {
   verify as verifyJwt,
   // type Payload,
-} from "jsr:@zaubrik/djwt@3.0.2";
+} from "@zaubrik/djwt";
 
 export type JwtPayload = {
   "iss": string;

@@ -1,4 +1,4 @@
-import { TextLineStream } from "jsr:@std/streams@1.0.9/text-line-stream";
+import { TextLineStream } from "@std/streams/text-line-stream";
 
 export class SubhostingApiClient {
   constructor(private readonly props: {

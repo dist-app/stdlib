@@ -1,4 +1,4 @@
-import { type EJSONableProperty } from "jsr:@cloudydeno/ejson@0.1.1";
+import { type EJSONableProperty } from "@cloudydeno/ejson";
 
 export type ClientSentPacket = {
   msg: 'ping' | 'pong';

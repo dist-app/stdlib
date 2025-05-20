@@ -1,14 +1,13 @@
-import { EJSON, type EJSONableProperty } from "jsr:@cloudydeno/ejson@0.1.1";
+import { EJSON, type EJSONableProperty } from "@cloudydeno/ejson";
+import { trace, SpanKind, SpanStatusCode, type Span, context, propagation, type Context } from "@cloudydeno/opentelemetry/pkg/api";
 
 // TODO: import 'sift' library to replace our DIY matching
-
-import { trace, SpanKind, SpanStatusCode, Span, context, propagation, Context } from "jsr:@cloudydeno/opentelemetry@0.10.1/pkg/api";
 
 const clientTracer = trace.getTracer('ddp.client');
 const methodTracer = trace.getTracer('ddp.method');
 const subTracer = trace.getTracer('ddp.subscription');
 
-import { ClientSentPacket, ServerSentPacket, DocumentPacket } from "../types.ts";
+import type { ClientSentPacket, ServerSentPacket, DocumentPacket } from "../types.ts";
 
 class DDPCollection {
   public readonly fields: Map<string,Record<string,unknown>> = new Map;

@@ -1,12 +1,11 @@
 #!/usr/bin/env -S deno run --allow-env --allow-net=api.deno.com --allow-run=deno,kubectl --allow-read=. --no-prompt
 
-import { decodeBase64 } from "jsr:@std/encoding@1.0.10";
+import { decodeBase64 } from "@std/encoding/base64";
+import type { RestClient } from "@cloudydeno/kubernetes-client";
+import { CoreV1Api } from "@cloudydeno/kubernetes-apis/core/v1";
+import { ExternaldnsV1alpha1Api } from "@cloudydeno/kubernetes-apis/externaldns.k8s.io/v1alpha1";
 
-import { type RestClient } from "jsr:@cloudydeno/kubernetes-client@0.7.3";
-import { CoreV1Api } from "jsr:@cloudydeno/kubernetes-apis@0.5.2/core/v1";
-import { ExternaldnsV1alpha1Api } from "jsr:@cloudydeno/kubernetes-apis@0.5.2/externaldns.k8s.io/v1alpha1";
-
-import { DomainRecord, SubhostingApiClient } from "./client.ts";
+import type { DomainRecord, SubhostingApiClient } from "./client.ts";
 
 interface CertificateEntry {
   altNames: string[];

@@ -1,6 +1,7 @@
-import { type Cookie } from "jsr:@std/http@1.0.14/cookie";
-import { type EntityEngine, type EntityStorage } from "../engine/types.ts";
-import { type UserEntity } from "./api/definitions.ts";
+import type { Cookie } from "@std/http/cookie";
+
+import type { EntityEngine, EntityStorage } from "../engine/types.ts";
+import type { UserEntity } from "./api/definitions.ts";
 
 export type AuthnMethodId =
   | 'cookie'

@@ -1,5 +1,6 @@
+import { encodeBase64, decodeBase64 } from "@std/encoding/base64";
+
 import type { OpenAPI2SchemaObject } from "./openapi.ts";
-import { encodeBase64, decodeBase64 } from "jsr:@std/encoding@1.0.10/base64";
 
 export interface ConversionOpts {
   nativeBinary: boolean;

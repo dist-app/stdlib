@@ -1,4 +1,4 @@
-/** @jsxRuntime automatic *//** @jsxImportSource jsr:@hono/hono@4.7.7/jsx */
+/** @jsxRuntime automatic *//** @jsxImportSource @hono/hono/jsx */
 
 import aaguids from "./passkey-aaguids.json" with { type: "json" };
 // import aaguids from "https://raw.githubusercontent.com/passkeydeveloper/passkey-authenticator-aaguids/32c75cd28e2301fbc15cf9aa08da8ab3acb5a670/aaguid.json" with { type: "json" };
