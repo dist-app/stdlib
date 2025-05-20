@@ -46,7 +46,7 @@ export function filterEventStream<T extends ApiKindEntity>(
   }));
 }
 
-type SubscriptionEvent =
+export type SubscriptionEvent =
 | (ServerSentPacket & {msg: 'added' | 'changed' | 'removed'})
 | {msg: 'ready'}
 | {msg: 'nosub', error?: Error}

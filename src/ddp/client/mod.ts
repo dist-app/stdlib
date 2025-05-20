@@ -146,7 +146,7 @@ export class DDPClient {
     // deno-lint-ignore no-explicit-any
     ok: (result: any) => void;
     fail: (error: Error) => void;
-    span: Span;
+    span: Span | null;
   }> = new Map;
   private readonly pendingSubs: Map<string, {
     ok: () => void;
@@ -173,7 +173,7 @@ export class DDPClient {
 
   async callMethod<T=EJSONableProperty>(name: string, params: EJSONableProperty[]): Promise<T> {
     const methodId = Math.random().toString(16).slice(2);
-    const span = methodTracer.startSpan(name, {
+    const span = name == 'OTLP/v1/traces' ? null : methodTracer.startSpan(name, {
       kind: SpanKind.CLIENT,
       attributes: {
         'rpc.system': 'ddp',
@@ -194,7 +194,7 @@ export class DDPClient {
         id: methodId,
         method: name,
         params: params,
-      }, trace.setSpan(context.active(), span)).catch(fail);
+      }, span ? trace.setSpan(context.active(), span) : context.active()).catch(fail);
     });
   }
 
@@ -302,7 +302,7 @@ export class DDPClient {
           `DDP error: received "${packet.msg}" for unknown method call ${JSON.stringify(packet.id)}`);
         this.pendingMethods.delete(packet.id);
         if (packet.error) {
-          handlers.span.setStatus({
+          handlers.span?.setStatus({
             code: SpanStatusCode.ERROR,
             message: packet.error.message,
           });
@@ -312,7 +312,7 @@ export class DDPClient {
         } else {
           handlers.ok(packet.result);
         }
-        handlers.span.end();
+        handlers.span?.end();
       } break;
 
       // Subscription document events
