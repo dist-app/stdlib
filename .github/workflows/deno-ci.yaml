@@ -18,7 +18,6 @@ jobs:
     strategy:
       matrix:
         deno-version:
-        - v2.3
         - v2.5
         - v2.7
         - v2.9
@@ -41,7 +40,7 @@ jobs:
       run: hack/update-jsr.ts
 
     - name: Check publish rules
-      run: time deno publish --dry-run
+      run: time deno publish --dry-run --allow-dirty
 
   publish:
     runs-on: ubuntu-latest

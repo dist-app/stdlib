@@ -86,7 +86,7 @@ export interface AuthRequestContext {
   readonly request: Request;
   readonly connInfo: Deno.ServeHandlerInfo;
   readonly requestUrl: URL;
-  readonly cookies: Record<string,string>;
+  readonly cookies: Record<string,string|undefined>;
   readonly respHeaders: Headers;
 
   setCookie(cookie: Cookie): void;

@@ -10,7 +10,7 @@ export class AuthRequestContextImpl implements AuthRequestContext {
     this.cookies = getCookies(this.request.headers);
   }
   requestUrl: URL;
-  cookies: Record<string,string>;
+  cookies: Record<string,string|undefined>;
   respHeaders: Headers = new Headers;
 
   setCookie(cookie: Cookie): void {

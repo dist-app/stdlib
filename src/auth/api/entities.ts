@@ -51,8 +51,8 @@ export interface PasskeyAssociationEntity extends ApiKindEntity {
     userName: string;
     aaguid: string;
     credential: {
-      id: Uint8Array;
-      publicKey: Uint8Array;
+      id: Uint8Array<ArrayBuffer>;
+      publicKey: Uint8Array<ArrayBuffer>;
       deviceType: 'singleDevice' | 'multiDevice';
       backedUp: boolean;
       transports?: Array<'usb' | 'ble' | 'nfc' | 'internal'>;
